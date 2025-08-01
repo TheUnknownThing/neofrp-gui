@@ -1,0 +1,216 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Dashboard - Neofrp{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-semibold text-gray-900">Welcome back, {{ current_user.username }}!</h1>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <!-- Statistics Cards -->
+        <div class="mt-8">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                <!-- Total Tunnels Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-network-wired text-3xl text-indigo-600"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Total Tunnels
+                                    </dt>
+                                    <dd class="text-lg font-medium text-gray-900">
+                                        {{ stats.total_tunnels }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm">
+                            <a href="{{ url_for('user.tunnels') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                Manage tunnels →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Tunnels Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-broadcast-tower text-3xl text-green-600"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Active Tunnels
+                                    </dt>
+                                    <dd class="text-lg font-medium text-gray-900">
+                                        {{ stats.active_tunnels }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm text-gray-500">
+                            {{ ((stats.active_tunnels / stats.total_tunnels * 100) if stats.total_tunnels > 0 else 0) | round(1) }}% active
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configurations Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-file-code text-3xl text-purple-600"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Configurations
+                                    </dt>
+                                    <dd class="text-lg font-medium text-gray-900">
+                                        {{ stats.total_configs }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm">
+                            <a href="{{ url_for('user.configurations') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                View configs →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8">
+            <h2 class="text-lg font-medium text-gray-900">Quick Actions</h2>
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <a href="{{ url_for('user.new_tunnel') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-plus-circle text-2xl text-indigo-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <span class="absolute inset-0" aria-hidden="true"></span>
+                        <p class="text-sm font-medium text-gray-900">Create New Tunnel</p>
+                        <p class="text-sm text-gray-500">Set up a new port forwarding rule</p>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('user.generate_config') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-download text-2xl text-green-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <span class="absolute inset-0" aria-hidden="true"></span>
+                        <p class="text-sm font-medium text-gray-900">Generate Configuration</p>
+                        <p class="text-sm text-gray-500">Create client config file</p>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('user.profile') }}" class="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-user-cog text-2xl text-purple-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <span class="absolute inset-0" aria-hidden="true"></span>
+                        <p class="text-sm font-medium text-gray-900">View Profile</p>
+                        <p class="text-sm text-gray-500">Manage your account settings</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Tunnels -->
+        {% if tunnels %}
+        <div class="mt-8">
+            <h2 class="text-lg font-medium text-gray-900">Recent Tunnels</h2>
+            <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
+                <ul class="divide-y divide-gray-200">
+                    {% for tunnel in tunnels %}
+                    <li>
+                        <div class="px-4 py-4 flex items-center sm:px-6">
+                            <div class="min-w-0 flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div class="truncate">
+                                    <div class="flex text-sm">
+                                        <p class="font-medium text-indigo-600 truncate">{{ tunnel.name }}</p>
+                                        <p class="ml-1 flex-shrink-0 font-normal text-gray-500">
+                                            ({{ tunnel.protocol.upper() }})
+                                        </p>
+                                    </div>
+                                    <div class="mt-2 flex">
+                                        <div class="flex items-center text-sm text-gray-500">
+                                            <i class="fas fa-desktop mr-1.5"></i>
+                                            <p>
+                                                Local: {{ tunnel.local_port }} → Server: {{ tunnel.server_port }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex-shrink-0 sm:mt-0 sm:ml-5">
+                                    {% if tunnel.is_active %}
+                                        <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="ml-5 flex-shrink-0">
+                                <a href="{{ url_for('user.edit_tunnel', tunnel_id=tunnel.id) }}" class="text-indigo-600 hover:text-indigo-900">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Your Token -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-key text-blue-400" aria-hidden="true"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">
+                        Your Authentication Token
+                    </h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <p>Use this token in your client configuration to authenticate with the server.</p>
+                        <div class="mt-3 bg-white rounded-md p-3 break-all font-mono text-xs border border-blue-200">
+                            {{ current_user.token }}
+                        </div>
+                        <button type="button" 
+                                onclick="navigator.clipboard.writeText('{{ current_user.token }}').then(() => alert('Token copied to clipboard!'))" 
+                                class="mt-3 inline-flex items-center px-3 py-1.5 border border-blue-300 shadow-sm text-xs font-medium rounded text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i class="fas fa-copy mr-1"></i>
+                            Copy to Clipboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

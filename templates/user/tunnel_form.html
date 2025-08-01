@@ -1,0 +1,158 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ title }} - Neofrp{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+            <div class="md:col-span-1">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">{{ title }}</h3>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Configure port forwarding settings for your tunnel.
+                    </p>
+                    
+                    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-400" aria-hidden="true"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">
+                                    Port Configuration Tips
+                                </h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <ul class="list-disc space-y-1 pl-5">
+                                        <li>Local port: The port on your local machine</li>
+                                        <li>Server port: The public port on the server</li>
+                                        <li>Use TCP for HTTP/HTTPS, SSH, etc.</li>
+                                        <li>Use UDP for gaming, VoIP, etc.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="shadow sm:rounded-md sm:overflow-hidden">
+                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                            <!-- Tunnel Name -->
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700">
+                                    Tunnel Name
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.name(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.name.errors else ""), placeholder="e.g., Web Server, SSH Access") }}
+                                </div>
+                                {% if form.name.errors %}
+                                    {% for error in form.name.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="mt-2 text-sm text-gray-500">
+                                    A descriptive name to identify this tunnel.
+                                </p>
+                            </div>
+
+                            <!-- Protocol -->
+                            <div>
+                                <label for="protocol" class="block text-sm font-medium text-gray-700">
+                                    Protocol
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.protocol(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.protocol.errors else "")) }}
+                                </div>
+                                {% if form.protocol.errors %}
+                                    {% for error in form.protocol.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Port Configuration -->
+                            <div class="grid grid-cols-6 gap-6">
+                                <!-- Local Port -->
+                                <div class="col-span-6 sm:col-span-3">
+                                    <label for="local_port" class="block text-sm font-medium text-gray-700">
+                                        Local Port
+                                    </label>
+                                    <div class="mt-1">
+                                        {{ form.local_port(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.local_port.errors else ""), placeholder="e.g., 80, 22, 3306") }}
+                                    </div>
+                                    {% if form.local_port.errors %}
+                                        {% for error in form.local_port.errors %}
+                                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <p class="mt-2 text-sm text-gray-500">
+                                        Port on your local machine.
+                                    </p>
+                                </div>
+
+                                <!-- Server Port -->
+                                <div class="col-span-6 sm:col-span-3">
+                                    <label for="server_port" class="block text-sm font-medium text-gray-700">
+                                        Server Port
+                                    </label>
+                                    <div class="mt-1">
+                                        {{ form.server_port(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.server_port.errors else ""), placeholder="e.g., 8080, 2222, 33060") }}
+                                    </div>
+                                    {% if form.server_port.errors %}
+                                        {% for error in form.server_port.errors %}
+                                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <p class="mt-2 text-sm text-gray-500">
+                                        Public port on the server.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Common Port Examples -->
+                            <div class="rounded-md bg-gray-50 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-lightbulb text-gray-400" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-gray-800">
+                                            Common Port Examples
+                                        </h3>
+                                        <div class="mt-2 text-sm text-gray-600">
+                                            <ul class="list-disc space-y-1 pl-5">
+                                                <li><strong>80/443</strong> - HTTP/HTTPS web servers</li>
+                                                <li><strong>22</strong> - SSH remote access</li>
+                                                <li><strong>3306</strong> - MySQL database</li>
+                                                <li><strong>5432</strong> - PostgreSQL database</li>
+                                                <li><strong>3389</strong> - Windows Remote Desktop</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                            <a href="{{ url_for('user.tunnels') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Cancel
+                            </a>
+                            <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                {% if tunnel %}
+                                    Update Tunnel
+                                {% else %}
+                                    Create Tunnel
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

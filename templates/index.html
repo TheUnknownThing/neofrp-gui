@@ -1,0 +1,97 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Neofrp - Modern Reverse Proxy{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <!-- Centered content container -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <!-- Hero section -->
+        <div class="mb-8">
+            <h1 class="text-5xl font-bold text-gray-800 sm:text-6xl md:text-7xl mb-4">
+                Neofrp
+            </h1>
+            <br>
+            <div id="typewriter-description" class="text-2xl text-gray-600 min-h-[3rem] max-w-3xl mx-auto mb-8">
+                <span id="typewriter-description-content"></span>
+                <span id="description-cursor" class="animate-pulse">|</span>
+            </div>
+            
+            <!-- GitHub link -->
+            <div class="text-center">
+                <a href="https://github.com/RayZh-hs/neofrp" target="_blank" rel="noopener noreferrer" 
+                   class="inline-flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
+                    <i class="fab fa-github text-xl mr-3"></i>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const features = [
+                "Yet another FRP solution for exposing your local services to the internet. ",
+                "High performance with Go-based architecture for maximum speed and efficiency.",
+                "Enterprise-grade security with end-to-end encryption and authentication.",
+                "Easy setup with simple configuration and intuitive management tools."
+            ];
+
+            let currentFeatureIndex = 0;
+            let currentState = 'typing'; // 'typing', 'waiting', 'deleting'
+            let currentCharIndex = 0;
+
+            const descriptionContent = document.getElementById('typewriter-description-content');
+            const descriptionCursor = document.getElementById('description-cursor');
+
+            function showDescriptionCursor() {
+                descriptionCursor.style.display = 'inline';
+            }
+
+            function typeWriter() {
+                const currentFeatureText = features[currentFeatureIndex];
+
+                switch(currentState) {
+                    case 'typing':
+                        showDescriptionCursor();
+                        descriptionContent.textContent = currentFeatureText.substring(0, currentCharIndex + 1);
+                        currentCharIndex++;
+
+                        if (currentCharIndex === currentFeatureText.length) {
+                            currentState = 'waiting';
+                            setTimeout(typeWriter, 1500); // Wait 3 seconds after completion
+                            return;
+                        }
+                        setTimeout(typeWriter, 35); // Fast typing
+                        break;
+
+                    case 'waiting':
+                        currentState = 'deleting';
+                        setTimeout(typeWriter, 300); // Brief pause before deleting
+                        break;
+
+                    case 'deleting':
+                        showDescriptionCursor();
+                        
+                        if (descriptionContent.textContent.length > 0) {
+                            descriptionContent.textContent = descriptionContent.textContent.slice(0, -1);
+                            setTimeout(typeWriter, 8); // Very fast deletion
+                        } else {
+                            // Deleted, move to next feature
+                            currentFeatureIndex = (currentFeatureIndex + 1) % features.length;
+                            currentState = 'typing';
+                            currentCharIndex = 0;
+                            setTimeout(typeWriter, 500); // Brief pause before next feature
+                            return;
+                        }
+                        break;
+                }
+            }
+
+            // Initialize
+            showDescriptionCursor();
+            typeWriter();
+        });
+    </script>
+</div>
+{% endblock %}

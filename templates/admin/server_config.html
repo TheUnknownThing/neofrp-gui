@@ -1,0 +1,73 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Server Configuration - Neofrp Admin{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    Server Configuration
+                </h3>
+                <div class="mt-2 max-w-xl text-sm text-gray-500">
+                    <p>Manage your Neofrp server configuration.</p>
+                </div>
+                <div class="mt-5">
+                    <div class="rounded-md bg-blue-50 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-400" aria-hidden="true"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">
+                                    Configuration Management
+                                </h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <p>
+                                        Server configuration management is currently handled through the server's JSON configuration file.
+                                        Future updates will include direct configuration management through this interface.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-gray-900">Example Server Configuration</h4>
+                        <pre class="mt-2 bg-gray-100 rounded-md p-4 overflow-x-auto text-sm">{
+    "log": {
+        "log_level": "info"
+    },
+    "recognized_tokens": [
+        "your_secret_token_1",
+        "your_secret_token_2"
+    ],
+    "transport": {
+        "protocol": "quic",
+        "port": 3400,
+        "cert_file": "/path/to/cert.pem",
+        "key_file": "/path/to/key.pem"
+    },
+    "connections": {
+        "tcp_ports": [8080, 8081, 8082],
+        "udp_ports": [9000, 9001]
+    }
+}</pre>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-gray-900">Configuration Tips</h4>
+                        <ul class="mt-2 list-disc list-inside text-sm text-gray-600 space-y-1">
+                            <li>Use the templating feature to register port ranges: <code>{{ "{{ expand \"1000-1200\" }}" }}</code></li>
+                            <li>Keep your tokens secure and rotate them regularly</li>
+                            <li>Use TLS certificates for production deployments</li>
+                            <li>Monitor server logs for connection issues</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

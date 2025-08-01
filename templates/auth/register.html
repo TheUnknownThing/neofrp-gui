@@ -1,0 +1,86 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Sign Up - Neofrp{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Or
+                <a href="{{ url_for('auth.login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    sign in to existing account
+                </a>
+            </p>
+        </div>
+        <form class="mt-8 space-y-6" method="POST">
+            {{ form.hidden_tag() }}
+            <div class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">
+                        Username
+                    </label>
+                    {{ form.username(class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" + (" border-red-300" if form.username.errors else ""), placeholder="Choose a username") }}
+                    {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">
+                        Email address
+                    </label>
+                    {{ form.email(class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" + (" border-red-300" if form.email.errors else ""), placeholder="you@example.com") }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">
+                        Password
+                    </label>
+                    {{ form.password(class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" + (" border-red-300" if form.password.errors else ""), placeholder="Minimum 8 characters") }}
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="password_confirm" class="block text-sm font-medium text-gray-700">
+                        Confirm Password
+                    </label>
+                    {{ form.password_confirm(class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" + (" border-red-300" if form.password_confirm.errors else ""), placeholder="Confirm your password") }}
+                    {% if form.password_confirm.errors %}
+                        {% for error in form.password_confirm.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <i class="fas fa-user-plus text-indigo-500 group-hover:text-indigo-400"></i>
+                    </span>
+                    Create Account
+                </button>
+            </div>
+            
+            <div class="text-xs text-gray-600 text-center">
+                By creating an account, you agree to our terms of service and privacy policy.
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

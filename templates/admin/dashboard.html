@@ -1,0 +1,232 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Admin Dashboard - Neofrp{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <!-- Statistics Cards -->
+        <div class="mt-8">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Total Users Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-users text-3xl text-indigo-600"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Total Users
+                                    </dt>
+                                    <dd class="text-lg font-medium text-gray-900">
+                                        {{ stats.total_users }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm">
+                            <a href="{{ url_for('admin.users') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                View all users →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Users Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-user-check text-3xl text-green-600"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Active Users
+                                    </dt>
+                                    <dd class="text-lg font-medium text-gray-900">
+                                        {{ stats.active_users }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm text-gray-500">
+                            {{ ((stats.active_users / stats.total_users * 100) if stats.total_users > 0 else 0) | round(1) }}% of total
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Tunnels Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-network-wired text-3xl text-purple-600"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Total Tunnels
+                                    </dt>
+                                    <dd class="text-lg font-medium text-gray-900">
+                                        {{ stats.total_tunnels }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm">
+                            <a href="{{ url_for('admin.tunnels') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                View all tunnels →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Tunnels Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-broadcast-tower text-3xl text-yellow-600"></i>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">
+                                        Active Tunnels
+                                    </dt>
+                                    <dd class="text-lg font-medium text-gray-900">
+                                        {{ stats.active_tunnels }}
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-5 py-3">
+                        <div class="text-sm text-gray-500">
+                            {{ ((stats.active_tunnels / stats.total_tunnels * 100) if stats.total_tunnels > 0 else 0) | round(1) }}% active
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Resources -->
+        <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <!-- System Information -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                        System Resources
+                    </h3>
+                    <div class="mt-5 space-y-4">
+                        <!-- CPU Usage -->
+                        <div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-700">CPU Usage</span>
+                                <span class="font-medium">{{ system_info.cpu_percent }}%</span>
+                            </div>
+                            <div class="mt-1 relative pt-1">
+                                <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                    <div style="width: {{ system_info.cpu_percent }}%" 
+                                         class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center 
+                                                {% if system_info.cpu_percent > 80 %}bg-red-500{% elif system_info.cpu_percent > 60 %}bg-yellow-500{% else %}bg-green-500{% endif %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Memory Usage -->
+                        <div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-700">Memory Usage</span>
+                                <span class="font-medium">{{ system_info.memory_used }} / {{ system_info.memory_total }} MB</span>
+                            </div>
+                            <div class="mt-1 relative pt-1">
+                                <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                    <div style="width: {{ system_info.memory_percent }}%" 
+                                         class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center 
+                                                {% if system_info.memory_percent > 80 %}bg-red-500{% elif system_info.memory_percent > 60 %}bg-yellow-500{% else %}bg-green-500{% endif %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Disk Usage -->
+                        <div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-700">Disk Usage</span>
+                                <span class="font-medium">{{ system_info.disk_used }} / {{ system_info.disk_total }} GB</span>
+                            </div>
+                            <div class="mt-1 relative pt-1">
+                                <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                    <div style="width: {{ system_info.disk_percent }}%" 
+                                         class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center 
+                                                {% if system_info.disk_percent > 80 %}bg-red-500{% elif system_info.disk_percent > 60 %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                        Recent Users
+                    </h3>
+                    <div class="mt-5">
+                        <div class="flow-root">
+                            <ul class="-my-5 divide-y divide-gray-200">
+                                {% for user in recent_users %}
+                                <li class="py-4">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
+                                                {{ user.username[0].upper() }}
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                                {{ user.username }}
+                                                {% if user.is_admin %}
+                                                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                    Admin
+                                                </span>
+                                                {% endif %}
+                                            </p>
+                                            <p class="text-sm text-gray-500 truncate">
+                                                {{ user.email }}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" 
+                                               class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                                View
+                                            </a>
+                                        </div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

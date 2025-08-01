@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Neofrp Admin{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom styles -->
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Ensure full height layout */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-gray-50 flex flex-col">
+    <div class="flex flex-col min-h-screen">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b border-gray-200 flex-shrink-0" x-data="{ mobileMenuOpen: false }">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <div class="flex-shrink-0 flex items-center">
+                            <a href="{{ url_for('main.index') }}" class="text-2xl font-bold text-black-500">
+                                Neofrp
+                            </a>
+                        </div>
+                        {% if current_user.is_authenticated %}
+                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin.dashboard') }}" 
+                               class="{% if request.endpoint == 'admin.dashboard' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <i class="fas fa-tachometer-alt mr-1"></i> Admin Dashboard
+                            </a>
+                            <a href="{{ url_for('admin.users') }}" 
+                               class="{% if request.endpoint == 'admin.users' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <i class="fas fa-users mr-1"></i> Users
+                            </a>
+                            {% endif %}
+                            <a href="{{ url_for('user.dashboard') }}" 
+                               class="{% if request.endpoint == 'user.dashboard' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <i class="fas fa-home mr-1"></i> Dashboard
+                            </a>
+                            <a href="{{ url_for('user.tunnels') }}" 
+                               class="{% if request.endpoint in ['user.tunnels', 'user.new_tunnel', 'user.edit_tunnel'] %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <i class="fas fa-network-wired mr-1"></i> Tunnels
+                            </a>
+                            <a href="{{ url_for('user.configurations') }}" 
+                               class="{% if request.endpoint in ['user.configurations', 'user.generate_config'] %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <i class="fas fa-cog mr-1"></i> Configurations
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                        {% if current_user.is_authenticated %}
+                        <div class="ml-3 relative" x-data="{ open: false }">
+                            <div>
+                                <button @click="open = !open" type="button" 
+                                        class="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" 
+                                        id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                    <span class="sr-only">Open user menu</span>
+                                    <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+                                        {{ current_user.username[0].upper() }}
+                                    </div>
+                                </button>
+                            </div>
+                            <div x-show="open" 
+                                 x-cloak
+                                 @click.away="open = false"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                                 role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                                <div class="px-4 py-2 text-sm text-gray-700 border-b">
+                                    <div class="font-medium">{{ current_user.username }}</div>
+                                    <div class="text-gray-500 text-xs">{{ current_user.email }}</div>
+                                </div>
+                                <a href="{{ url_for('user.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1">
+                                    <i class="fas fa-user mr-2"></i>Your Profile
+                                </a>
+                                <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" tabindex="-1">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Sign out
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="flex items-center space-x-4">
+                            <a href="{{ url_for('main.docs') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-book mr-1"></i>Documentation
+                            </a>
+                            <a href="{{ url_for('auth.login') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                                Sign in
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="text-black-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                                Sign up
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="-mr-2 flex items-center sm:hidden">
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" 
+                                class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                            <span class="sr-only">Open main menu</span>
+                            <svg x-show="!mobileMenuOpen" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <svg x-show="mobileMenuOpen" x-cloak class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile menu -->
+            <div x-show="mobileMenuOpen" x-cloak class="sm:hidden">
+                <div class="pt-2 pb-3 space-y-1">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'admin.dashboard' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Admin Dashboard
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('user.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'user.dashboard' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
+                            <i class="fas fa-home mr-2"></i>Dashboard
+                        </a>
+                        <a href="{{ url_for('user.tunnels') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint in ['user.tunnels', 'user.new_tunnel', 'user.edit_tunnel'] %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
+                            <i class="fas fa-network-wired mr-2"></i>Tunnels
+                        </a>
+                        <a href="{{ url_for('user.configurations') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint in ['user.configurations', 'user.generate_config'] %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
+                            <i class="fas fa-cog mr-2"></i>Configurations
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="pt-4 pb-3 border-t border-gray-200">
+                    {% if current_user.is_authenticated %}
+                    <div class="flex items-center px-4">
+                        <div class="flex-shrink-0">
+                            <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+                                {{ current_user.username[0].upper() }}
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <div class="text-base font-medium text-gray-800">{{ current_user.username }}</div>
+                            <div class="text-sm font-medium text-gray-500">{{ current_user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 space-y-1">
+                        <a href="{{ url_for('user.profile') }}" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2"></i>Your Profile
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Sign out
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="space-y-1">
+                        <a href="{{ url_for('main.docs') }}" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                            <i class="fas fa-book mr-2"></i>Documentation
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                            Sign in
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100">
+                            Sign up
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 flex-shrink-0">
+                    {% for category, message in messages %}
+                        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                             class="rounded-md p-4 mb-4 {% if category == 'error' %}bg-red-50 text-red-800{% elif category == 'success' %}bg-green-50 text-green-800{% elif category == 'warning' %}bg-yellow-50 text-yellow-800{% else %}bg-blue-50 text-blue-800{% endif %}">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    {% if category == 'error' %}
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    {% elif category == 'success' %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% elif category == 'warning' %}
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">{{ message }}</p>
+                                </div>
+                                <div class="ml-auto pl-3">
+                                    <button @click="show = false" class="inline-flex rounded-md p-1.5 hover:bg-opacity-20 hover:bg-gray-500 focus:outline-none">
+                                        <span class="sr-only">Dismiss</span>
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Main content -->
+        <main class="flex-1 flex flex-col">
+            <div class="flex-1">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 flex-shrink-0">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <p class="text-center text-sm text-gray-500">
+                    &copy; 2024 Neofrp. All rights reserved.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,201 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit User - Neofrp Admin{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+            <div class="md:col-span-1">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Edit User</h3>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Update user account information and permissions.
+                    </p>
+                    
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-gray-900">User Statistics</h4>
+                        <dl class="mt-2 border-t border-gray-200 divide-y divide-gray-200">
+                            <div class="py-3">
+                                <dt class="text-sm font-medium text-gray-500">Member since</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ user.created_at.strftime('%B %d, %Y') }}</dd>
+                            </div>
+                            <div class="py-3">
+                                <dt class="text-sm font-medium text-gray-500">Last login</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    {% if user.last_login %}
+                                        {{ user.last_login.strftime('%B %d, %Y at %I:%M %p') }}
+                                    {% else %}
+                                        Never
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            <div class="py-3">
+                                <dt class="text-sm font-medium text-gray-500">Total tunnels</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ user.tunnels.count() }}</dd>
+                            </div>
+                            <div class="py-3">
+                                <dt class="text-sm font-medium text-gray-500">Active tunnels</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ user.tunnels.filter_by(is_active=True).count() }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="shadow sm:rounded-md sm:overflow-hidden">
+                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                            <!-- Username -->
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700">
+                                    Username
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.username(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.username.errors else "")) }}
+                                </div>
+                                {% if form.username.errors %}
+                                    {% for error in form.username.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">
+                                    Email address
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.email(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.email.errors else "")) }}
+                                </div>
+                                {% if form.email.errors %}
+                                    {% for error in form.email.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <!-- New Password -->
+                            <div>
+                                <label for="new_password" class="block text-sm font-medium text-gray-700">
+                                    New Password
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.new_password(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.new_password.errors else ""), placeholder="Leave blank to keep current password") }}
+                                </div>
+                                {% if form.new_password.errors %}
+                                    {% for error in form.new_password.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Only fill this if you want to change the user's password.
+                                </p>
+                            </div>
+
+                            <!-- Permissions -->
+                            <fieldset>
+                                <legend class="text-base font-medium text-gray-900">Permissions</legend>
+                                <div class="mt-4 space-y-4">
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            {{ form.is_active(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="is_active" class="font-medium text-gray-700">Active</label>
+                                            <p class="text-gray-500">User can log in and use the system.</p>
+                                        </div>
+                                    </div>
+                                    {% if can_change_admin %}
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            {{ form.is_admin(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="is_admin" class="font-medium text-gray-700">Administrator</label>
+                                            <p class="text-gray-500">User has full system access and can manage other users.</p>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="flex items-start opacity-50">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" disabled checked class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label class="font-medium text-gray-700">Administrator</label>
+                                            <p class="text-gray-500">You cannot remove your own admin privileges.</p>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </fieldset>
+
+                            <!-- User Token -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">
+                                    Authentication Token
+                                </label>
+                                <div class="mt-1">
+                                    <div class="bg-gray-100 rounded-md p-3 break-all font-mono text-xs">
+                                        {{ user.token }}
+                                    </div>
+                                    <div class="mt-2 flex space-x-3">
+                                        <button type="button" 
+                                                onclick="navigator.clipboard.writeText('{{ user.token }}').then(() => alert('Token copied to clipboard!'))" 
+                                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            <i class="fas fa-copy mr-1"></i>
+                                            Copy Token
+                                        </button>
+                                        <button type="button" 
+                                                onclick="resetUserToken()" 
+                                                class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                            <i class="fas fa-sync mr-1"></i>
+                                            Reset Token
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                            <a href="{{ url_for('admin.users') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Cancel
+                            </a>
+                            <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function resetUserToken() {
+    if (!confirm('Are you sure you want to reset this user\'s token? The old token will no longer work.')) {
+        return;
+    }
+    
+    fetch(`/admin/users/{{ user.id }}/reset-token`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

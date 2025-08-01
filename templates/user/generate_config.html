@@ -1,0 +1,204 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Generate Configuration - Neofrp{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+            <div class="md:col-span-1">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Generate Configuration</h3>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Create a client configuration file for your active tunnels.
+                    </p>
+                    
+                    {% if active_tunnels %}
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-gray-900">Active Tunnels to Include:</h4>
+                        <ul class="mt-2 divide-y divide-gray-200">
+                            {% for tunnel in active_tunnels %}
+                            <li class="py-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    <div class="text-sm">
+                                        <p class="font-medium text-gray-900">{{ tunnel.name }}</p>
+                                        <p class="text-gray-500">{{ tunnel.protocol.upper() }} {{ tunnel.local_port }} → {{ tunnel.server_port }}</p>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-400" aria-hidden="true"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">
+                                    No Active Tunnels
+                                </h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <p>You need at least one active tunnel to generate a configuration.</p>
+                                    <a href="{{ url_for('user.tunnels') }}" class="font-medium underline">Manage your tunnels →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="shadow sm:rounded-md sm:overflow-hidden">
+                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                            <!-- Configuration Name -->
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700">
+                                    Configuration Name
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.name(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.name.errors else ""), placeholder="e.g., Production, Development, Home") }}
+                                </div>
+                                {% if form.name.errors %}
+                                    {% for error in form.name.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="mt-2 text-sm text-gray-500">
+                                    A descriptive name for this configuration.
+                                </p>
+                            </div>
+
+                            <!-- Server Details -->
+                            <div class="grid grid-cols-6 gap-6">
+                                <!-- Server IP/Domain -->
+                                <div class="col-span-6 sm:col-span-4">
+                                    <label for="server_ip" class="block text-sm font-medium text-gray-700">
+                                        Server IP/Domain
+                                    </label>
+                                    <div class="mt-1">
+                                        {{ form.server_ip(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.server_ip.errors else ""), placeholder="e.g., example.com or 192.168.1.100") }}
+                                    </div>
+                                    {% if form.server_ip.errors %}
+                                        {% for error in form.server_ip.errors %}
+                                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                <!-- Server Port -->
+                                <div class="col-span-6 sm:col-span-2">
+                                    <label for="server_port" class="block text-sm font-medium text-gray-700">
+                                        Server Port
+                                    </label>
+                                    <div class="mt-1">
+                                        {{ form.server_port(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.server_port.errors else ""), placeholder="3400") }}
+                                    </div>
+                                    {% if form.server_port.errors %}
+                                        {% for error in form.server_port.errors %}
+                                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Transport Protocol -->
+                            <div>
+                                <label for="transport_protocol" class="block text-sm font-medium text-gray-700">
+                                    Transport Protocol
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.transport_protocol(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.transport_protocol.errors else "")) }}
+                                </div>
+                                {% if form.transport_protocol.errors %}
+                                    {% for error in form.transport_protocol.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="mt-2 text-sm text-gray-500">
+                                    QUIC is recommended for better performance, TCP for compatibility.
+                                </p>
+                            </div>
+
+                            <!-- Preview -->
+                            {% if active_tunnels %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">
+                                    Configuration Preview
+                                </label>
+                                <div class="mt-1">
+                                    <pre class="bg-gray-100 rounded-md p-4 overflow-x-auto text-sm" id="configPreview"></pre>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                            <a href="{{ url_for('user.configurations') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Cancel
+                            </a>
+                            {% if active_tunnels %}
+                            <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Generate Configuration
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if active_tunnels %}
+<script>
+const tunnels = [
+    {% for tunnel in active_tunnels %}
+    {
+        "type": "{{ tunnel.protocol }}",
+        "local_port": {{ tunnel.local_port }},
+        "server_port": {{ tunnel.server_port }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+const userToken = "{{ user_token }}";
+
+function updatePreview() {
+    const serverIp = document.getElementById('server_ip').value || 'your.server.ip';
+    const serverPort = document.getElementById('server_port').value || '3400';
+    const protocol = document.getElementById('transport_protocol').value || 'quic';
+    
+    const config = {
+        "log": {
+            "log_level": "info"
+        },
+        "token": userToken,
+        "transport": {
+            "protocol": protocol,
+            "server_ip": serverIp,
+            "server_port": parseInt(serverPort)
+        },
+        "connections": tunnels
+    };
+    
+    document.getElementById('configPreview').textContent = JSON.stringify(config, null, 2);
+}
+
+// Update preview on form change
+document.getElementById('server_ip').addEventListener('input', updatePreview);
+document.getElementById('server_port').addEventListener('input', updatePreview);
+document.getElementById('transport_protocol').addEventListener('change', updatePreview);
+
+// Initial preview
+updatePreview();
+</script>
+{% endif %}
+{% endblock %}

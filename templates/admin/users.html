@@ -1,0 +1,266 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}User Management - Neofrp Admin{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+                <h1 class="text-2xl font-semibold text-gray-900">Users</h1>
+                <p class="mt-2 text-sm text-gray-700">
+                    Manage all registered users in the system.
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-8 flex flex-col">
+            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        User
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Status
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Role
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Tunnels
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Joined
+                                    </th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                        Last Login
+                                    </th>
+                                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                        <span class="sr-only">Actions</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+                                {% for user in users.items %}
+                                <tr>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                        <div class="flex items-center">
+                                            <div class="h-10 w-10 flex-shrink-0">
+                                                <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
+                                                    {{ user.username[0].upper() }}
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ user.username }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ user.email }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                        {% if user.is_active %}
+                                            <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                                                Active
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">
+                                                Inactive
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        {% if user.is_admin %}
+                                            <span class="inline-flex rounded-full bg-indigo-100 px-2 text-xs font-semibold leading-5 text-indigo-800">
+                                                Admin
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800">
+                                                User
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        {{ user.tunnels.count() }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        {{ user.created_at.strftime('%Y-%m-%d') }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        {% if user.last_login %}
+                                            {{ user.last_login.strftime('%Y-%m-%d %H:%M') }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </td>
+                                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                        <div class="flex justify-end space-x-2">
+                                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" 
+                                               class="text-indigo-600 hover:text-indigo-900">
+                                                <i class="fas fa-edit"></i>
+                                                <span class="sr-only">Edit</span>
+                                            </a>
+                                            <button type="button" 
+                                                    onclick="showTokenModal('{{ user.username }}', '{{ user.token }}', {{ user.id }})"
+                                                    class="text-blue-600 hover:text-blue-900">
+                                                <i class="fas fa-key"></i>
+                                                <span class="sr-only">View Token</span>
+                                            </button>
+                                            {% if user.id != current_user.id %}
+                                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" 
+                                                  class="inline" 
+                                                  onsubmit="return confirm('Are you sure you want to delete user {{ user.username }}? This action cannot be undone.');">
+                                                <button type="submit" class="text-red-600 hover:text-red-900">
+                                                    <i class="fas fa-trash"></i>
+                                                    <span class="sr-only">Delete</span>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if users.pages > 1 %}
+        <nav class="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 mt-6">
+            <div class="-mt-px flex w-0 flex-1">
+                {% if users.has_prev %}
+                <a href="{{ url_for('admin.users', page=users.prev_num) }}" 
+                   class="inline-flex items-center border-t-2 border-transparent pt-4 pr-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                    <i class="fas fa-arrow-left mr-3"></i>
+                    Previous
+                </a>
+                {% endif %}
+            </div>
+            <div class="hidden md:-mt-px md:flex">
+                {% for page_num in users.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num != users.page %}
+                        <a href="{{ url_for('admin.users', page=page_num) }}" 
+                           class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                            {{ page_num }}
+                        </a>
+                        {% else %}
+                        <span class="inline-flex items-center border-t-2 border-indigo-500 px-4 pt-4 text-sm font-medium text-indigo-600">
+                            {{ page_num }}
+                        </span>
+                        {% endif %}
+                    {% else %}
+                        <span class="inline-flex items-center border-t-2 border-transparent px-4 pt-4 text-sm font-medium text-gray-500">
+                            ...
+                        </span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="-mt-px flex w-0 flex-1 justify-end">
+                {% if users.has_next %}
+                <a href="{{ url_for('admin.users', page=users.next_num) }}" 
+                   class="inline-flex items-center border-t-2 border-transparent pt-4 pl-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                    Next
+                    <i class="fas fa-arrow-right ml-3"></i>
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Token Modal -->
+<div id="tokenModal" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="hideTokenModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div>
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+                    <i class="fas fa-key text-blue-600"></i>
+                </div>
+                <div class="mt-3 text-center sm:mt-5">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                        User Token: <span id="tokenUsername"></span>
+                    </h3>
+                    <div class="mt-2">
+                        <div class="bg-gray-100 rounded-md p-3 break-all font-mono text-sm" id="tokenValue"></div>
+                        <button type="button" 
+                                onclick="copyToken()" 
+                                class="mt-3 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <i class="fas fa-copy mr-1"></i>
+                            Copy to Clipboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                <button type="button" 
+                        onclick="resetToken()" 
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-1 sm:text-sm">
+                    Reset Token
+                </button>
+                <button type="button" 
+                        onclick="hideTokenModal()" 
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-2 sm:text-sm">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentUserId = null;
+
+function showTokenModal(username, token, userId) {
+    document.getElementById('tokenUsername').textContent = username;
+    document.getElementById('tokenValue').textContent = token;
+    currentUserId = userId;
+    document.getElementById('tokenModal').classList.remove('hidden');
+}
+
+function hideTokenModal() {
+    document.getElementById('tokenModal').classList.add('hidden');
+}
+
+function copyToken() {
+    const tokenValue = document.getElementById('tokenValue').textContent;
+    navigator.clipboard.writeText(tokenValue).then(() => {
+        alert('Token copied to clipboard!');
+    });
+}
+
+function resetToken() {
+    if (!confirm('Are you sure you want to reset this user\'s token? The old token will no longer work.')) {
+        return;
+    }
+    
+    fetch(`/admin/users/${currentUserId}/reset-token`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('tokenValue').textContent = data.new_token;
+            alert(data.message);
+        }
+    });
+}
+</script>
+{% endblock %}

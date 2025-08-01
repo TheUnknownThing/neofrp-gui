@@ -1,0 +1,204 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Documentation - Neofrp{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Neofrp Documentation</h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Complete guide to setting up and using Neofrp for secure reverse proxy tunneling
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Getting Started Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-rocket text-blue-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Getting Started</h2>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="border-l-4 border-blue-500 pl-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">1. Create an Account</h3>
+                    <p class="text-gray-600">Register for a new account using the sign-up page. The first user to register will automatically receive administrator privileges.</p>
+                </div>
+                
+                <div class="border-l-4 border-green-500 pl-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">2. Create Tunnels</h3>
+                    <p class="text-gray-600 mb-3">Navigate to the Tunnels page and create new port forwarding rules. Each tunnel consists of:</p>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <ul class="space-y-2 text-gray-700">
+                            <li><span class="font-semibold">Name:</span> A descriptive identifier for your tunnel</li>
+                            <li><span class="font-semibold">Protocol:</span> TCP or UDP</li>
+                            <li><span class="font-semibold">Local Port:</span> The port on your local machine</li>
+                            <li><span class="font-semibold">Server Port:</span> The public port on the server</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="border-l-4 border-purple-500 pl-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">3. Generate Configuration</h3>
+                    <p class="text-gray-600">Go to the Configurations page and generate a client configuration file. This will include all your active tunnels and authentication token.</p>
+                </div>
+                
+                <div class="border-l-4 border-orange-500 pl-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">4. Run the Client</h3>
+                    <div class="bg-gray-900 rounded-lg p-4">
+                        <code class="text-green-400 font-mono">./frpc -c client.json</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Common Use Cases Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-lightbulb text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Common Use Cases</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-globe text-blue-600 mr-3"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">Web Server</h3>
+                    </div>
+                    <p class="text-gray-600 mb-3">Expose a local web server running on port 80:</p>
+                    <div class="space-y-1 text-sm text-gray-700">
+                        <div><span class="font-semibold">Protocol:</span> TCP</div>
+                        <div><span class="font-semibold">Local Port:</span> 80</div>
+                        <div><span class="font-semibold">Server Port:</span> 8080</div>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-terminal text-green-600 mr-3"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">SSH Access</h3>
+                    </div>
+                    <p class="text-gray-600 mb-3">Enable remote SSH access to your machine:</p>
+                    <div class="space-y-1 text-sm text-gray-700">
+                        <div><span class="font-semibold">Protocol:</span> TCP</div>
+                        <div><span class="font-semibold">Local Port:</span> 22</div>
+                        <div><span class="font-semibold">Server Port:</span> 2222</div>
+                    </div>
+                </div>
+                
+                <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-database text-purple-600 mr-3"></i>
+                        <h3 class="text-lg font-semibold text-gray-900">Database Access</h3>
+                    </div>
+                    <p class="text-gray-600 mb-3">Allow remote access to a local database:</p>
+                    <div class="space-y-1 text-sm text-gray-700">
+                        <div><span class="font-semibold">Protocol:</span> TCP</div>
+                        <div><span class="font-semibold">Local Port:</span> 3306/5432</div>
+                        <div><span class="font-semibold">Server Port:</span> Any available</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-shield-alt text-red-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Security Considerations</h2>
+            </div>
+            
+            <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-red-600 mr-3 mt-1"></i>
+                        <span>Keep your authentication token secure and never share it</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-red-600 mr-3 mt-1"></i>
+                        <span>Use QUIC protocol when possible for better security</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-red-600 mr-3 mt-1"></i>
+                        <span>Regularly review and disable unused tunnels</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-red-600 mr-3 mt-1"></i>
+                        <span>Consider using additional authentication for exposed services</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Troubleshooting Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+            <div class="flex items-center mb-6">
+                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-tools text-yellow-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Troubleshooting</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                        Connection Issues
+                    </h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
+                            <span>Verify the server IP and port are correct</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
+                            <span>Check if the local service is running</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
+                            <span>Ensure the server ports are not blocked by firewall</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
+                            <span>Confirm your authentication token is valid</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-tachometer-alt text-orange-600 mr-2"></i>
+                        Performance Issues
+                    </h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-orange-600 mr-2 mt-1 text-xs"></i>
+                            <span>Try switching between QUIC and TCP protocols</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-orange-600 mr-2 mt-1 text-xs"></i>
+                            <span>Check your network bandwidth and latency</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right text-orange-600 mr-2 mt-1 text-xs"></i>
+                            <span>Consider using a server closer to your location</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
