@@ -101,6 +101,7 @@ def edit_user(user_id):
             user.is_admin = form.is_admin.data
         
         user.is_active = form.is_active.data
+        user.tunnel_limit = form.tunnel_limit.data
         
         if form.new_password.data:
             user.set_password(form.new_password.data)

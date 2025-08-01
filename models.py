@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     is_admin = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
+    tunnel_limit = db.Column(db.Integer, default=10)  # Default limit of 10 tunnels per user
     token = db.Column(db.String(128), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)

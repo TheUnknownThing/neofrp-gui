@@ -62,7 +62,7 @@
                                     Configuration Name
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.name(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.name.errors else ""), placeholder="e.g., Production, Development, Home") }}
+                                    {{ form.name(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.name.errors else ""), placeholder="e.g., Production, Development, Home") }}
                                 </div>
                                 {% if form.name.errors %}
                                     {% for error in form.name.errors %}
@@ -82,7 +82,7 @@
                                         Server IP/Domain
                                     </label>
                                     <div class="mt-1">
-                                        {{ form.server_ip(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.server_ip.errors else ""), placeholder="e.g., example.com or 192.168.1.100") }}
+                                        {{ form.server_ip(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.server_ip.errors else ""), placeholder="e.g., example.com or 192.168.1.100") }}
                                     </div>
                                     {% if form.server_ip.errors %}
                                         {% for error in form.server_ip.errors %}
@@ -97,7 +97,7 @@
                                         Server Port
                                     </label>
                                     <div class="mt-1">
-                                        {{ form.server_port(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.server_port.errors else ""), placeholder="3400") }}
+                                        {{ form.server_port(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.server_port.errors else ""), placeholder="3400") }}
                                     </div>
                                     {% if form.server_port.errors %}
                                         {% for error in form.server_port.errors %}
@@ -113,7 +113,7 @@
                                     Transport Protocol
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.transport_protocol(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.transport_protocol.errors else "")) }}
+                                    {{ form.transport_protocol(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.transport_protocol.errors else "")) }}
                                 </div>
                                 {% if form.transport_protocol.errors %}
                                     {% for error in form.transport_protocol.errors %}

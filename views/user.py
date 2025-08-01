@@ -55,6 +55,13 @@ def new_tunnel():
     form = TunnelForm()
     
     if form.validate_on_submit():
+        # Check tunnel limit
+        if current_user.tunnel_limit > 0:  # 0 means unlimited
+            current_tunnel_count = current_user.tunnels.count()
+            if current_tunnel_count >= current_user.tunnel_limit:
+                flash(f'You have reached your tunnel limit of {current_user.tunnel_limit} tunnels.', 'error')
+                return render_template('user/tunnel_form.html', form=form, title='New Tunnel')
+        
         # Check if tunnel name already exists for this user
         existing = Tunnel.query.filter_by(
             user_id=current_user.id,
@@ -63,6 +70,15 @@ def new_tunnel():
         
         if existing:
             flash('A tunnel with this name already exists.', 'error')
+            return render_template('user/tunnel_form.html', form=form, title='New Tunnel')
+        
+        # Check if server port is already in use by any user
+        port_conflict = Tunnel.query.filter_by(
+            server_port=form.server_port.data
+        ).first()
+        
+        if port_conflict:
+            flash(f'Server port {form.server_port.data} is already in use. Please choose a different port.', 'error')
             return render_template('user/tunnel_form.html', form=form, title='New Tunnel')
         
         tunnel = Tunnel(
@@ -103,6 +119,19 @@ def edit_tunnel(tunnel_id):
             
             if existing:
                 flash('A tunnel with this name already exists.', 'error')
+                return render_template('user/tunnel_form.html', 
+                                     form=form, 
+                                     title='Edit Tunnel',
+                                     tunnel=tunnel)
+        
+        # Check if server port is already in use by another tunnel
+        if tunnel.server_port != form.server_port.data:
+            port_conflict = Tunnel.query.filter_by(
+                server_port=form.server_port.data
+            ).first()
+            
+            if port_conflict:
+                flash(f'Server port {form.server_port.data} is already in use. Please choose a different port.', 'error')
                 return render_template('user/tunnel_form.html', 
                                      form=form, 
                                      title='Edit Tunnel',

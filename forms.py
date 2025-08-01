@@ -103,6 +103,10 @@ class UserEditForm(FlaskForm):
     ])
     is_admin = BooleanField('Administrator')
     is_active = BooleanField('Active')
+    tunnel_limit = IntegerField('Tunnel Limit', validators=[
+        DataRequired(message='Tunnel limit is required'),
+        NumberRange(min=0, max=1000, message='Tunnel limit must be between 0 and 1000')
+    ])
     new_password = PasswordField('New Password', validators=[
         Optional(),
         Length(min=8, message='Password must be at least 8 characters long')
