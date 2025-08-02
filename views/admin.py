@@ -35,27 +35,11 @@ def dashboard():
         'total_configs': Configuration.query.count(),
     }
     
-    # Get system resource usage
-    cpu_percent = psutil.cpu_percent(interval=1)
-    memory = psutil.virtual_memory()
-    disk = psutil.disk_usage('/')
-    
-    system_info = {
-        'cpu_percent': cpu_percent,
-        'memory_percent': memory.percent,
-        'memory_used': memory.used // (1024 * 1024),  # MB
-        'memory_total': memory.total // (1024 * 1024),  # MB
-        'disk_percent': disk.percent,
-        'disk_used': disk.used // (1024 * 1024 * 1024),  # GB
-        'disk_total': disk.total // (1024 * 1024 * 1024),  # GB
-    }
-    
     # Get recent users
     recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
     
     return render_template('admin/dashboard.html', 
-                         stats=stats, 
-                         system_info=system_info,
+                         stats=stats,
                          recent_users=recent_users)
 
 @admin_bp.route('/users')

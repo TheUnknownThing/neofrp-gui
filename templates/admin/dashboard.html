@@ -45,7 +45,7 @@
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <i class="fas fa-user-check text-3xl text-green-600"></i>
+                                <i class="fas fa-user-check text-3xl text-indigo-600"></i>
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
@@ -71,7 +71,7 @@
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <i class="fas fa-network-wired text-3xl text-purple-600"></i>
+                                <i class="fas fa-network-wired text-3xl text-indigo-600"></i>
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
@@ -99,7 +99,7 @@
                     <div class="p-5">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
-                                <i class="fas fa-broadcast-tower text-3xl text-yellow-600"></i>
+                                <i class="fas fa-broadcast-tower text-3xl text-indigo-600"></i>
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
@@ -124,63 +124,6 @@
 
         <!-- System Resources -->
         <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
-            <!-- System Information -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">
-                        System Resources
-                    </h3>
-                    <div class="mt-5 space-y-4">
-                        <!-- CPU Usage -->
-                        <div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-700">CPU Usage</span>
-                                <span class="font-medium">{{ system_info.cpu_percent }}%</span>
-                            </div>
-                            <div class="mt-1 relative pt-1">
-                                <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-                                    <div style="width: {{ system_info.cpu_percent }}%" 
-                                         class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center 
-                                                {% if system_info.cpu_percent > 80 %}bg-red-500{% elif system_info.cpu_percent > 60 %}bg-yellow-500{% else %}bg-green-500{% endif %}">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Memory Usage -->
-                        <div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-700">Memory Usage</span>
-                                <span class="font-medium">{{ system_info.memory_used }} / {{ system_info.memory_total }} MB</span>
-                            </div>
-                            <div class="mt-1 relative pt-1">
-                                <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-                                    <div style="width: {{ system_info.memory_percent }}%" 
-                                         class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center 
-                                                {% if system_info.memory_percent > 80 %}bg-red-500{% elif system_info.memory_percent > 60 %}bg-yellow-500{% else %}bg-green-500{% endif %}">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Disk Usage -->
-                        <div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-700">Disk Usage</span>
-                                <span class="font-medium">{{ system_info.disk_used }} / {{ system_info.disk_total }} GB</span>
-                            </div>
-                            <div class="mt-1 relative pt-1">
-                                <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-                                    <div style="width: {{ system_info.disk_percent }}%" 
-                                         class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center 
-                                                {% if system_info.disk_percent > 80 %}bg-red-500{% elif system_info.disk_percent > 60 %}bg-yellow-500{% else %}bg-blue-500{% endif %}">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Recent Users -->
             <div class="bg-white shadow rounded-lg">
