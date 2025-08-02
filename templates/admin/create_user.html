@@ -1,0 +1,146 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create User - Neofrp{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="flex-1 min-w-0">
+                <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                    Create New User
+                </h1>
+            </div>
+            <div class="mt-4 flex md:mt-0 md:ml-4">
+                <a href="{{ url_for('admin.users') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Users
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 md:px-8">
+        <div class="py-6">
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <!-- Username -->
+                            <div class="sm:col-span-1">
+                                <label for="{{ form.username.id }}" class="block text-sm font-medium text-gray-700">
+                                    {{ form.username.label.text }}
+                                </label>
+                                {{ form.username(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.username.errors else "")) }}
+                                {% if form.username.errors %}
+                                    {% for error in form.username.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="sm:col-span-1">
+                                <label for="{{ form.email.id }}" class="block text-sm font-medium text-gray-700">
+                                    {{ form.email.label.text }}
+                                </label>
+                                {{ form.email(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.email.errors else "")) }}
+                                {% if form.email.errors %}
+                                    {% for error in form.email.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Password -->
+                            <div class="sm:col-span-2">
+                                <label for="{{ form.password.id }}" class="block text-sm font-medium text-gray-700">
+                                    {{ form.password.label.text }}
+                                </label>
+                                {{ form.password(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.password.errors else "")) }}
+                                {% if form.password.errors %}
+                                    {% for error in form.password.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Tunnel Limit -->
+                            <div class="sm:col-span-1">
+                                <label for="{{ form.tunnel_limit.id }}" class="block text-sm font-medium text-gray-700">
+                                    {{ form.tunnel_limit.label.text }}
+                                </label>
+                                {{ form.tunnel_limit(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.tunnel_limit.errors else "")) }}
+                                {% if form.tunnel_limit.errors %}
+                                    {% for error in form.tunnel_limit.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            
+                            <!-- User Permissions and Status -->
+                            <div class="sm:col-span-2">
+                                <fieldset>
+                                    <legend class="text-sm font-medium text-gray-700 mb-3">User Permissions & Status</legend>
+                                    <div class="space-y-3">
+                                        <div class="flex items-start">
+                                            <div class="flex items-center h-5">
+                                                {{ form.is_active(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                            </div>
+                                            <div class="ml-3 text-sm">
+                                                <label for="{{ form.is_active.id }}" class="font-medium text-gray-700">
+                                                    {{ form.is_active.label.text }}
+                                                </label>
+                                                <p class="text-gray-500">User can log in and use the system</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="flex items-center h-5">
+                                                {{ form.is_verified(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                            </div>
+                                            <div class="ml-3 text-sm">
+                                                <label for="{{ form.is_verified.id }}" class="font-medium text-gray-700">
+                                                    {{ form.is_verified.label.text }}
+                                                </label>
+                                                <p class="text-gray-500">User account is verified and can be used</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-start">
+                                            <div class="flex items-center h-5">
+                                                {{ form.is_admin(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                            </div>
+                                            <div class="ml-3 text-sm">
+                                                <label for="{{ form.is_admin.id }}" class="font-medium text-gray-700">
+                                                    {{ form.is_admin.label.text }}
+                                                </label>
+                                                <p class="text-gray-500">User has administrator privileges</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <a href="{{ url_for('admin.users') }}" 
+                               class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Create User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

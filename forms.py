@@ -103,6 +103,7 @@ class UserEditForm(FlaskForm):
     ])
     is_admin = BooleanField('Administrator')
     is_active = BooleanField('Active')
+    is_verified = BooleanField('Verified')
     tunnel_limit = IntegerField('Tunnel Limit', validators=[
         DataRequired(message='Tunnel limit is required'),
         NumberRange(min=0, max=1000, message='Tunnel limit must be between 0 and 1000')
@@ -127,3 +128,48 @@ class UserEditForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user and user.id != self.user_id:
             raise ValidationError('Email already registered.')
+
+
+class AdminSettingsForm(FlaskForm):
+    """Form for admin settings management."""
+    registration_enabled = BooleanField('Allow New Registrations', 
+                                      default=True,
+                                      description='Enable or disable new user registration')
+    require_verification = BooleanField('Require Admin Verification', 
+                                       default=False,
+                                       description='New users must be verified by admin before they can use the system')
+
+
+class AdminCreateUserForm(FlaskForm):
+    """Form for admin to create new users directly."""
+    username = StringField('Username', validators=[
+        DataRequired(message='Username is required'),
+        Length(min=3, max=64, message='Username must be between 3 and 64 characters')
+    ])
+    email = StringField('Email', validators=[
+        DataRequired(message='Email is required'),
+        Email(message='Invalid email address')
+    ])
+    password = PasswordField('Password', validators=[
+        DataRequired(message='Password is required'),
+        Length(min=8, message='Password must be at least 8 characters long')
+    ])
+    is_admin = BooleanField('Administrator')
+    is_active = BooleanField('Active', default=True)
+    is_verified = BooleanField('Verified', default=True)
+    tunnel_limit = IntegerField('Tunnel Limit', validators=[
+        DataRequired(message='Tunnel limit is required'),
+        NumberRange(min=0, max=1000, message='Tunnel limit must be between 0 and 1000')
+    ], default=10)
+    
+    def validate_username(self, username):
+        """Check if username is already taken."""
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError('Username already taken. Please choose another one.')
+    
+    def validate_email(self, email):
+        """Check if email is already registered."""
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('Email already registered. Please use another one.')

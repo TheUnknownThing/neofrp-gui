@@ -9,9 +9,6 @@
             <div class="md:col-span-1">
                 <div class="px-4 sm:px-0">
                     <h3 class="text-lg font-medium leading-6 text-gray-900">Edit User</h3>
-                    <p class="mt-1 text-sm text-gray-600">
-                        Update user account information and permissions.
-                    </p>
                     
                     <div class="mt-6">
                         <h4 class="text-sm font-medium text-gray-900">User Statistics</h4>
@@ -125,6 +122,15 @@
                                         <div class="ml-3 text-sm">
                                             <label for="is_active" class="font-medium text-gray-700">Active</label>
                                             <p class="text-gray-500">User can log in and use the system.</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            {{ form.is_verified(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="is_verified" class="font-medium text-gray-700">Verified</label>
+                                            <p class="text-gray-500">User account is verified and can access the system.</p>
                                         </div>
                                     </div>
                                     {% if can_change_admin %}

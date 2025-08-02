@@ -30,6 +30,10 @@ def login():
             flash('Your account has been deactivated. Please contact an administrator.', 'error')
             return redirect(url_for('auth.login'))
         
+        if not user.is_verified:
+            flash('Your account is pending admin verification. Please contact an administrator.', 'error')
+            return redirect(url_for('auth.login'))
+        
         # Update last login time
         user.last_login = datetime.utcnow()
         db.session.commit()
@@ -56,11 +60,19 @@ def register():
         return redirect(url_for('main.index'))
     
     from forms import RegistrationForm
-    from models import User
+    from models import User, AdminSettings
     from database import db
+    
+    # Check if registration is enabled
+    registration_enabled = AdminSettings.get_setting('registration_enabled', True)
+    if not registration_enabled:
+        return render_template('auth/register.html', registration_disabled=True)
     
     form = RegistrationForm()
     if form.validate_on_submit():
+        # Check if admin verification is required
+        require_verification = AdminSettings.get_setting('require_verification', False)
+        
         # Create new user
         user = User(
             username=form.username.data,
@@ -69,16 +81,24 @@ def register():
         user.set_password(form.password.data)
         user.generate_token()
         
-        # First user becomes admin
+        # First user becomes admin and is automatically verified
         if User.query.count() == 0:
             user.is_admin = True
+            user.is_verified = True
             flash('As the first user, you have been granted administrator privileges.', 'info')
+        else:
+            # Set verification status based on admin settings
+            user.is_verified = not require_verification
         
         db.session.add(user)
         db.session.commit()
         
         logger.info(f'New user registered: {user.username}')
-        flash('Registration successful! You can now log in.', 'success')
+        
+        if require_verification and not user.is_admin:
+            flash('Registration successful! Your account is pending admin verification before you can log in.', 'info')
+        else:
+            flash('Registration successful! You can now log in.', 'success')
         
         return redirect(url_for('auth.login'))
     

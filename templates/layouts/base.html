@@ -156,17 +156,20 @@
                     {% if current_user.is_authenticated %}
                         {% if current_user.is_admin %}
                         <a href="{{ url_for('admin.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'admin.dashboard' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
-                            <i class="fas fa-tachometer-alt mr-2"></i>Admin Dashboard
+                            Admin Dashboard
+                        </a>
+                        <a href="{{ url_for('admin.users') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'admin.users' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
+                            Users
                         </a>
                         {% endif %}
                         <a href="{{ url_for('user.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'user.dashboard' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
-                            <i class="fas fa-home mr-2"></i>Dashboard
+                            Dashboard
                         </a>
                         <a href="{{ url_for('user.tunnels') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint in ['user.tunnels', 'user.new_tunnel', 'user.edit_tunnel'] %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
-                            <i class="fas fa-network-wired mr-2"></i>Tunnels
+                            Tunnels
                         </a>
                         <a href="{{ url_for('user.configurations') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint in ['user.configurations', 'user.generate_config'] %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
-                            <i class="fas fa-cog mr-2"></i>Configurations
+                            Configurations
                         </a>
                     {% endif %}
                 </div>

@@ -85,6 +85,7 @@ def edit_user(user_id):
             user.is_admin = form.is_admin.data
         
         user.is_active = form.is_active.data
+        user.is_verified = form.is_verified.data
         user.tunnel_limit = form.tunnel_limit.data
         
         if form.new_password.data:
@@ -163,6 +164,110 @@ def tunnels():
     )
     
     return render_template('admin/tunnels.html', tunnels=tunnels_pagination)
+
+@admin_bp.route('/settings', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def settings():
+    """Admin settings management."""
+    from forms import AdminSettingsForm
+    from models import AdminSettings
+    from database import db
+    
+    form = AdminSettingsForm()
+    
+    if form.validate_on_submit():
+        # Update settings
+        AdminSettings.set_setting('registration_enabled', form.registration_enabled.data)
+        AdminSettings.set_setting('require_verification', form.require_verification.data)
+        
+        flash('Settings updated successfully.', 'success')
+        logger.info(f'Admin {current_user.username} updated registration settings')
+        
+        return redirect(url_for('admin.settings'))
+    
+    # Only populate form with current settings on GET requests
+    if request.method == 'GET':
+        registration_enabled = AdminSettings.get_setting('registration_enabled', True)
+        require_verification = AdminSettings.get_setting('require_verification', False)
+        
+        form.registration_enabled.data = registration_enabled
+        form.require_verification.data = require_verification
+    
+    return render_template('admin/settings.html', form=form)
+
+@admin_bp.route('/create-user', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_user():
+    """Create a new user directly by admin."""
+    from forms import AdminCreateUserForm
+    from models import User
+    from database import db
+    
+    form = AdminCreateUserForm()
+    if form.validate_on_submit():
+        # Create new user
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            is_admin=form.is_admin.data,
+            is_active=form.is_active.data,
+            is_verified=form.is_verified.data,
+            tunnel_limit=form.tunnel_limit.data
+        )
+        user.set_password(form.password.data)
+        user.generate_token()
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        flash(f'User {user.username} created successfully.', 'success')
+        logger.info(f'Admin {current_user.username} created new user: {user.username}')
+        
+        return redirect(url_for('admin.users'))
+    
+    return render_template('admin/create_user.html', form=form)
+
+@admin_bp.route('/users/<int:user_id>/verify', methods=['POST'])
+@login_required
+@admin_required
+def verify_user(user_id):
+    """Verify a user."""
+    from models import User
+    from database import db
+    
+    user = User.query.get_or_404(user_id)
+    user.is_verified = True
+    db.session.commit()
+    
+    flash(f'User {user.username} has been verified.', 'success')
+    logger.info(f'Admin {current_user.username} verified user {user.username}')
+    
+    return redirect(url_for('admin.users'))
+
+@admin_bp.route('/users/<int:user_id>/unverify', methods=['POST'])
+@login_required
+@admin_required
+def unverify_user(user_id):
+    """Unverify a user."""
+    from models import User
+    from database import db
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Prevent unverifying self
+    if user.id == current_user.id:
+        flash('You cannot unverify your own account.', 'error')
+        return redirect(url_for('admin.users'))
+    
+    user.is_verified = False
+    db.session.commit()
+    
+    flash(f'User {user.username} has been unverified.', 'success')
+    logger.info(f'Admin {current_user.username} unverified user {user.username}')
+    
+    return redirect(url_for('admin.users'))
 
 @admin_bp.route('/server-config')
 @login_required

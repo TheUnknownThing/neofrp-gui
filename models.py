@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     is_admin = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
+    is_verified = db.Column(db.Boolean, default=True)  # For admin verification requirement
     tunnel_limit = db.Column(db.Integer, default=10)  # Default limit of 10 tunnels per user
     token = db.Column(db.String(128), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -107,5 +108,50 @@ class Configuration(db.Model):
     
     def __repr__(self):
         return f'<Configuration {self.name} for {self.user.username}>'
+
+
+class AdminSettings(db.Model):
+    """Model for storing admin settings."""
+    __tablename__ = 'admin_settings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    setting_key = db.Column(db.String(64), unique=True, nullable=False)
+    setting_value = db.Column(db.Text, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    @staticmethod
+    def get_setting(key, default=None):
+        """Get setting value by key."""
+        setting = AdminSettings.query.filter_by(setting_key=key).first()
+        if setting:
+            # Try to parse as JSON for complex values, fall back to string
+            try:
+                import json
+                return json.loads(setting.setting_value)
+            except (json.JSONDecodeError, ValueError):
+                return setting.setting_value
+        return default
+    
+    @staticmethod
+    def set_setting(key, value):
+        """Set setting value by key."""
+        setting = AdminSettings.query.filter_by(setting_key=key).first()
+        if not setting:
+            setting = AdminSettings(setting_key=key)
+            db.session.add(setting)
+        
+        # Convert to JSON string if not already a string
+        if not isinstance(value, str):
+            import json
+            setting.setting_value = json.dumps(value)
+        else:
+            setting.setting_value = value
+            
+        setting.updated_at = datetime.utcnow()
+        db.session.commit()
+        return setting
+    
+    def __repr__(self):
+        return f'<AdminSettings {self.setting_key}>'
 
 

@@ -1,0 +1,115 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Admin Settings - Neofrp{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="flex-1 min-w-0">
+                <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                    Admin Settings
+                </h1>
+            </div>
+            <div class="mt-4 flex md:mt-0 md:ml-4">
+                <a href="{{ url_for('admin.dashboard') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <div class="py-6">
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                        Registration Settings
+                    </h3>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="space-y-6">
+                            <!-- Registration Enabled -->
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    {{ form.registration_enabled(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="{{ form.registration_enabled.id }}" class="font-medium text-gray-700">
+                                        {{ form.registration_enabled.label.text }}
+                                    </label>
+                                    <p class="text-gray-500">
+                                        Allow new users to register accounts. When disabled, the registration page will be inaccessible.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Require Verification -->
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    {{ form.require_verification(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="{{ form.require_verification.id }}" class="font-medium text-gray-700">
+                                        {{ form.require_verification.label.text }}
+                                    </label>
+                                    <p class="text-gray-500">
+                                        New registrations will require admin verification before users can log in. This setting only applies when registration is enabled.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-end">
+                            <button type="submit" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i class="fas fa-save mr-2"></i>
+                                Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="mt-6 bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                        Quick Actions
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="border rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">Create New User</h4>
+                            <p class="text-sm text-gray-500 mb-3">
+                                Directly create a new user account without requiring registration.
+                            </p>
+                            <a href="{{ url_for('admin.create_user') }}" 
+                               class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Create User
+                            </a>
+                        </div>
+                        
+                        <div class="border rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">Manage Users</h4>
+                            <p class="text-sm text-gray-500 mb-3">
+                                View and manage all users, including verification status.
+                            </p>
+                            <a href="{{ url_for('admin.users') }}" 
+                               class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i class="fas fa-users mr-2"></i>
+                                Manage Users
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
