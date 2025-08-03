@@ -81,11 +81,11 @@ def register():
         user.set_password(form.password.data)
         user.generate_token()
         
-        # First user becomes admin and is automatically verified
+        # First user becomes root user and is automatically verified
         if User.query.count() == 0:
-            user.is_admin = True
+            user.set_role('root_user')
             user.is_verified = True
-            flash('As the first user, you have been granted administrator privileges.', 'info')
+            flash('As the first user, you have been granted root administrator privileges.', 'info')
         else:
             # Set verification status based on admin settings
             user.is_verified = not require_verification

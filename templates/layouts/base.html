@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Neofrp Admin{% endblock %}</title>
+    <title>{% block title %}{{ website_name or 'Neofrp' }}{% endblock %}</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -55,7 +55,7 @@
                     <div class="flex">
                         <div class="flex-shrink-0 flex items-center">
                             <a href="{{ url_for('main.index') }}" class="text-2xl font-bold text-black-500">
-                                Neofrp
+                                {{ website_name or 'Neofrp' }}
                             </a>
                         </div>
                         {% if current_user.is_authenticated %}
@@ -211,32 +211,59 @@
             </div>
         </nav>
 
+        <!-- Notification Banner -->
+        {% if notification_banner %}
+        <div class="bg-indigo-600 flex-shrink-0">
+            <div class="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between flex-wrap">
+                    <div class="w-0 flex-1 flex items-center">
+                        <span class="flex p-2 rounded-lg bg-indigo-800">
+                            <i class="fas fa-bullhorn text-white"></i>
+                        </span>
+                        <p class="ml-3 font-medium text-white truncate">
+                            {{ notification_banner }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 flex-shrink-0">
                     {% for category, message in messages %}
-                        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
-                             class="rounded-md p-4 mb-4 {% if category == 'error' %}bg-red-50 text-red-800{% elif category == 'success' %}bg-green-50 text-green-800{% elif category == 'warning' %}bg-yellow-50 text-yellow-800{% else %}bg-blue-50 text-blue-800{% endif %}">
+                        <div x-data="{ show: true }" 
+                             x-show="show" 
+                             x-init="setTimeout(() => show = false, 5000)"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform scale-95"
+                             x-transition:enter-end="opacity-100 transform scale-100"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 transform scale-100"
+                             x-transition:leave-end="opacity-0 transform scale-95"
+                             class="rounded-md p-4 mb-4 shadow-lg border-l-4 {% if category == 'error' %}bg-red-50 border-red-400 text-red-800{% elif category == 'success' %}bg-green-50 border-green-400 text-green-800{% elif category == 'warning' %}bg-yellow-50 border-yellow-400 text-yellow-800{% else %}bg-blue-50 border-blue-400 text-blue-800{% endif %}">
                             <div class="flex">
                                 <div class="flex-shrink-0">
                                     {% if category == 'error' %}
-                                        <i class="fas fa-exclamation-circle"></i>
+                                        <i class="fas fa-exclamation-circle text-red-500"></i>
                                     {% elif category == 'success' %}
-                                        <i class="fas fa-check-circle"></i>
+                                        <i class="fas fa-check-circle text-green-500"></i>
                                     {% elif category == 'warning' %}
-                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <i class="fas fa-exclamation-triangle text-yellow-500"></i>
                                     {% else %}
-                                        <i class="fas fa-info-circle"></i>
+                                        <i class="fas fa-info-circle text-blue-500"></i>
                                     {% endif %}
                                 </div>
-                                <div class="ml-3">
+                                <div class="ml-3 flex-1">
                                     <p class="text-sm font-medium">{{ message }}</p>
                                 </div>
                                 <div class="ml-auto pl-3">
-                                    <button @click="show = false" class="inline-flex rounded-md p-1.5 hover:bg-opacity-20 hover:bg-gray-500 focus:outline-none">
+                                    <button @click="show = false" 
+                                            class="inline-flex rounded-md p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
                                         <span class="sr-only">Dismiss</span>
-                                        <i class="fas fa-times"></i>
+                                        <i class="fas fa-times text-sm"></i>
                                     </button>
                                 </div>
                             </div>
@@ -245,6 +272,47 @@
                 </div>
             {% endif %}
         {% endwith %}
+
+        <!-- Toast Notification System -->
+        <div x-data="toastManager()" @toast.window="addToast($event.detail)" class="fixed top-20 right-4 z-50 space-y-2">
+            <template x-for="toast in toasts" :key="toast.id">
+                <div x-show="toast.show" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform translate-x-full"
+                     x-transition:enter-end="opacity-100 transform translate-x-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 transform translate-x-0"
+                     x-transition:leave-end="opacity-0 transform translate-x-full"
+                     :class="{
+                         'bg-green-50 border-green-200 text-green-800': toast.type === 'success',
+                         'bg-red-50 border-red-200 text-red-800': toast.type === 'error',
+                         'bg-yellow-50 border-yellow-200 text-yellow-800': toast.type === 'warning',
+                         'bg-blue-50 border-blue-200 text-blue-800': toast.type === 'info'
+                     }"
+                     class="max-w-sm w-full rounded-lg border shadow-lg p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i :class="{
+                                'fas fa-check-circle text-green-500': toast.type === 'success',
+                                'fas fa-exclamation-circle text-red-500': toast.type === 'error',
+                                'fas fa-exclamation-triangle text-yellow-500': toast.type === 'warning',
+                                'fas fa-info-circle text-blue-500': toast.type === 'info'
+                            }"></i>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium" x-text="toast.message"></p>
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <button @click="removeToast(toast.id)" 
+                                    class="inline-flex rounded-md p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                                <span class="sr-only">Dismiss</span>
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
 
         <!-- Main content -->
         <main class="flex-1 flex flex-col">
@@ -264,5 +332,71 @@
     </div>
 
     {% block extra_scripts %}{% endblock %}
+
+    <!-- Toast Notification Script -->
+    <script>
+        function toastManager() {
+            return {
+                toasts: [],
+                nextId: 1,
+                
+                addToast(config) {
+                    const toast = {
+                        id: this.nextId++,
+                        message: config.message || 'Notification',
+                        type: config.type || 'info',
+                        show: false
+                    };
+                    
+                    this.toasts.push(toast);
+                    
+                    // Show toast with slight delay for animation
+                    setTimeout(() => {
+                        toast.show = true;
+                    }, 100);
+                    
+                    // Auto remove after 5 seconds
+                    setTimeout(() => {
+                        this.removeToast(toast.id);
+                    }, 5000);
+                },
+                
+                removeToast(id) {
+                    const toast = this.toasts.find(t => t.id === id);
+                    if (toast) {
+                        toast.show = false;
+                        // Remove from array after animation
+                        setTimeout(() => {
+                            this.toasts = this.toasts.filter(t => t.id !== id);
+                        }, 200);
+                    }
+                }
+            }
+        }
+
+        // Global function to show toasts
+        window.showToast = function(message, type = 'info') {
+            window.dispatchEvent(new CustomEvent('toast', {
+                detail: { message, type }
+            }));
+        };
+
+        // Helper functions
+        window.showSuccess = function(message) {
+            window.showToast(message, 'success');
+        };
+
+        window.showError = function(message) {
+            window.showToast(message, 'error');
+        };
+
+        window.showWarning = function(message) {
+            window.showToast(message, 'warning');
+        };
+
+        window.showInfo = function(message) {
+            window.showToast(message, 'info');
+        };
+    </script>
 </body>
 </html>

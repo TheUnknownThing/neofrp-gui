@@ -20,25 +20,27 @@ def init_database():
         # Check if there are any users
         user_count = User.query.count()
         if user_count == 0:
-            print("\nNo users found. Creating a default admin user...")
+            print("\nNo users found. Creating a default root user...")
             
-            # Create default admin user
+            # Create default root user
             admin = User(
                 username='admin',
                 email='admin@example.com',
-                is_admin=True,
-                is_active=True
+                is_active=True,
+                is_verified=True
             )
             admin.set_password('admin123')  # Change this!
+            admin.set_role('root_user')  # Set as root user
             admin.generate_token()
             
             db.session.add(admin)
             db.session.commit()
             
-            print("\nDefault admin user created:")
+            print("\nDefault root user created:")
             print(f"  Username: admin")
             print(f"  Password: admin123")
             print(f"  Email: admin@example.com")
+            print(f"  Role: Root Administrator")
             print(f"  Token: {admin.token}")
             print("\n⚠️  IMPORTANT: Change the default password immediately!")
         else:

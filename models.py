@@ -13,7 +13,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(256))
-    is_admin = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)  # Keep for backward compatibility
+    user_role = db.Column(db.String(20), default='user')  # 'user', 'admin', 'root_user'
     is_active = db.Column(db.Boolean, default=True)
     is_verified = db.Column(db.Boolean, default=True)  # For admin verification requirement
     tunnel_limit = db.Column(db.Integer, default=10)  # Default limit of 10 tunnels per user
@@ -39,8 +40,25 @@ class User(UserMixin, db.Model):
         self.token = secrets.token_urlsafe(32)
         return self.token
     
+    @property
+    def is_root_user(self):
+        """Check if user is root user."""
+        return self.user_role == 'root_user'
+    
+    @property 
+    def is_administrator(self):
+        """Check if user is admin or root user."""
+        return self.user_role in ['admin', 'root_user']
+    
+    def set_role(self, role):
+        """Set user role and update is_admin field for compatibility."""
+        if role not in ['user', 'admin', 'root_user']:
+            raise ValueError("Role must be 'user', 'admin', or 'root_user'")
+        self.user_role = role
+        self.is_admin = role in ['admin', 'root_user']
+    
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<User {self.username} ({self.user_role})>'
 
 
 class Tunnel(db.Model):

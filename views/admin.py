@@ -12,9 +12,19 @@ logger = logging.getLogger(__name__)
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
+        if not current_user.is_authenticated or not current_user.is_administrator:
             flash('You need administrator privileges to access this page.', 'error')
             return redirect(url_for('main.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Root user required decorator
+def root_user_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_root_user:
+            flash('You need root administrator privileges to access this page.', 'error')
+            return redirect(url_for('admin.dashboard'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -77,12 +87,23 @@ def edit_user(user_id):
     
     form = UserEditForm(user_id=user_id, obj=user)
     
+    # Populate form with current user data on GET requests
+    if request.method == 'GET':
+        form.user_role.data = user.user_role
+    
     if form.validate_on_submit():
         user.username = form.username.data
         user.email = form.email.data
         
         if can_change_admin:
-            user.is_admin = form.is_admin.data
+            # Only root users can create/edit root users
+            if form.user_role.data == 'root_user' and not current_user.is_root_user:
+                flash('Only root administrators can manage root user accounts.', 'error')
+                return render_template('admin/edit_user.html', 
+                                     form=form, 
+                                     user=user,
+                                     can_change_admin=can_change_admin)
+            user.set_role(form.user_role.data)
         
         user.is_active = form.is_active.data
         user.is_verified = form.is_verified.data
@@ -196,6 +217,43 @@ def settings():
     
     return render_template('admin/settings.html', form=form)
 
+@admin_bp.route('/root-settings', methods=['GET', 'POST'])
+@login_required
+@root_user_required
+def root_settings():
+    """Root administrator settings management."""
+    from forms import RootSettingsForm
+    from models import AdminSettings
+    from database import db
+    
+    form = RootSettingsForm()
+    
+    if form.validate_on_submit():
+        # Update root-only settings
+        AdminSettings.set_setting('website_name', form.website_name.data)
+        AdminSettings.set_setting('notification_banner', form.notification_banner.data)
+        AdminSettings.set_setting('port_range_start', form.port_range_start.data)
+        AdminSettings.set_setting('port_range_end', form.port_range_end.data)
+        
+        flash('Root settings updated successfully.', 'success')
+        logger.info(f'Root user {current_user.username} updated root settings')
+        
+        return redirect(url_for('admin.root_settings'))
+    
+    # Only populate form with current settings on GET requests
+    if request.method == 'GET':
+        website_name = AdminSettings.get_setting('website_name', 'Neofrp Admin Panel')
+        notification_banner = AdminSettings.get_setting('notification_banner', '')
+        port_range_start = AdminSettings.get_setting('port_range_start', 20000)
+        port_range_end = AdminSettings.get_setting('port_range_end', 50000)
+        
+        form.website_name.data = website_name
+        form.notification_banner.data = notification_banner
+        form.port_range_start.data = port_range_start
+        form.port_range_end.data = port_range_end
+    
+    return render_template('admin/root_settings.html', form=form)
+
 @admin_bp.route('/create-user', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -207,16 +265,21 @@ def create_user():
     
     form = AdminCreateUserForm()
     if form.validate_on_submit():
+        # Only root users can create root users
+        if form.user_role.data == 'root_user' and not current_user.is_root_user:
+            flash('Only root administrators can create root user accounts.', 'error')
+            return render_template('admin/create_user.html', form=form)
+        
         # Create new user
         user = User(
             username=form.username.data,
             email=form.email.data,
-            is_admin=form.is_admin.data,
             is_active=form.is_active.data,
             is_verified=form.is_verified.data,
             tunnel_limit=form.tunnel_limit.data
         )
         user.set_password(form.password.data)
+        user.set_role(form.user_role.data)
         user.generate_token()
         
         db.session.add(user)

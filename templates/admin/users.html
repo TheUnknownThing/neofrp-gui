@@ -95,7 +95,11 @@
                                         {% endif %}
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                        {% if user.is_admin %}
+                                        {% if user.is_root_user %}
+                                            <span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">
+                                                Root
+                                            </span>
+                                        {% elif user.is_administrator %}
                                             <span class="inline-flex rounded-full bg-indigo-100 px-2 text-xs font-semibold leading-5 text-indigo-800">
                                                 Admin
                                             </span>
@@ -282,7 +286,7 @@ function hideTokenModal() {
 function copyToken() {
     const tokenValue = document.getElementById('tokenValue').textContent;
     navigator.clipboard.writeText(tokenValue).then(() => {
-        alert('Token copied to clipboard!');
+                                    showSuccess('Token copied to clipboard!');
     });
 }
 
@@ -301,7 +305,7 @@ function resetToken() {
     .then(data => {
         if (data.success) {
             document.getElementById('tokenValue').textContent = data.new_token;
-            alert(data.message);
+                                    showSuccess(data.message);
         }
     });
 }

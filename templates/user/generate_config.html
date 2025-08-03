@@ -62,7 +62,7 @@
                                     Configuration Name
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.name(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.name.errors else ""), placeholder="e.g., Production, Development, Home") }}
+                                    {{ form.name(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.name.errors else ""), placeholder="e.g., Production, Development, Home") }}
                                 </div>
                                 {% if form.name.errors %}
                                     {% for error in form.name.errors %}
@@ -113,7 +113,7 @@
                                     Transport Protocol
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.transport_protocol(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.transport_protocol.errors else "")) }}
+                                                                            {{ form.transport_protocol(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none bg-white" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.transport_protocol.errors else "")) }}
                                 </div>
                                 {% if form.transport_protocol.errors %}
                                     {% for error in form.transport_protocol.errors %}

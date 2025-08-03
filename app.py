@@ -58,7 +58,19 @@ def create_app(config_name='production'):
     def load_user(user_id):
         """Load user by ID for Flask-Login."""
         from models import User
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
+    
+    # Template context processor for global settings
+    @app.context_processor
+    def inject_global_settings():
+        """Inject global settings into all templates."""
+        from models import AdminSettings
+        return {
+            'website_name': AdminSettings.get_setting('website_name', 'Neofrp Admin Panel'),
+            'notification_banner': AdminSettings.get_setting('notification_banner', ''),
+            'port_range_start': AdminSettings.get_setting('port_range_start', 20000),
+            'port_range_end': AdminSettings.get_setting('port_range_end', 50000)
+        }
     
     # Create database tables
     with app.app_context():

@@ -51,7 +51,7 @@
                                     Username
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.username(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.username.errors else "")) }}
+                                    {{ form.username(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.username.errors else "")) }}
                                 </div>
                                 {% if form.username.errors %}
                                     {% for error in form.username.errors %}
@@ -66,7 +66,7 @@
                                     Email address
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.email(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.email.errors else "")) }}
+                                    {{ form.email(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.email.errors else "")) }}
                                 </div>
                                 {% if form.email.errors %}
                                     {% for error in form.email.errors %}
@@ -81,7 +81,7 @@
                                     New Password
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.new_password(class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.new_password.errors else ""), placeholder="Leave blank to keep current password") }}
+                                    {{ form.new_password(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.new_password.errors else ""), placeholder="Leave blank to keep current password") }}
                                 </div>
                                 {% if form.new_password.errors %}
                                     {% for error in form.new_password.errors %}
@@ -99,7 +99,7 @@
                                     Tunnel Limit
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.tunnel_limit(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.tunnel_limit.errors else ""), placeholder="10") }}
+                                    {{ form.tunnel_limit(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.tunnel_limit.errors else ""), placeholder="10") }}
                                 </div>
                                 {% if form.tunnel_limit.errors %}
                                     {% for error in form.tunnel_limit.errors %}
@@ -117,7 +117,7 @@
                                 <div class="mt-4 space-y-4">
                                     <div class="flex items-start">
                                         <div class="flex items-center h-5">
-                                            {{ form.is_active(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                            {{ form.is_active(class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
                                         </div>
                                         <div class="ml-3 text-sm">
                                             <label for="is_active" class="font-medium text-gray-700">Active</label>
@@ -126,7 +126,7 @@
                                     </div>
                                     <div class="flex items-start">
                                         <div class="flex items-center h-5">
-                                            {{ form.is_verified(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                            {{ form.is_verified(class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
                                         </div>
                                         <div class="ml-3 text-sm">
                                             <label for="is_verified" class="font-medium text-gray-700">Verified</label>
@@ -134,24 +134,33 @@
                                         </div>
                                     </div>
                                     {% if can_change_admin %}
-                                    <div class="flex items-start">
-                                        <div class="flex items-center h-5">
-                                            {{ form.is_admin(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                    <div>
+                                        <label for="user_role" class="block text-sm font-medium text-gray-700">
+                                            User Role
+                                        </label>
+                                        <div class="mt-1">
+                                            {{ form.user_role(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none bg-white" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.user_role.errors else "")) }}
                                         </div>
-                                        <div class="ml-3 text-sm">
-                                            <label for="is_admin" class="font-medium text-gray-700">Administrator</label>
-                                            <p class="text-gray-500">User has full system access and can manage other users.</p>
-                                        </div>
+                                        {% if form.user_role.errors %}
+                                            {% for error in form.user_role.errors %}
+                                                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            User: Regular user access. Admin: Can manage users and tunnels. Root: Full system access including settings.
+                                        </p>
                                     </div>
                                     {% else %}
-                                    <div class="flex items-start opacity-50">
-                                        <div class="flex items-center h-5">
-                                            <input type="checkbox" disabled checked class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">User Role</label>
+                                        <div class="mt-1">
+                                            <div class="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-900">
+                                                {% if user.user_role == 'root_user' %}Root Administrator{% elif user.user_role == 'admin' %}Administrator{% else %}Regular User{% endif %}
+                                            </div>
                                         </div>
-                                        <div class="ml-3 text-sm">
-                                            <label class="font-medium text-gray-700">Administrator</label>
-                                            <p class="text-gray-500">You cannot remove your own admin privileges.</p>
-                                        </div>
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            You cannot change your own role.
+                                        </p>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -168,7 +177,7 @@
                                     </div>
                                     <div class="mt-2 flex space-x-3">
                                         <button type="button" 
-                                                onclick="navigator.clipboard.writeText('{{ user.token }}').then(() => alert('Token copied to clipboard!'))" 
+                                                onclick="navigator.clipboard.writeText('{{ user.token }}').then(() => showSuccess('Token copied to clipboard!'))" 
                                                 class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                             <i class="fas fa-copy mr-1"></i>
                                             Copy Token
@@ -216,7 +225,7 @@ function resetUserToken() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+                                    showSuccess(data.message);
             location.reload();
         }
     });

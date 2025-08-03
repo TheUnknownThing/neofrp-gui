@@ -131,7 +131,7 @@ function hideConfigModal() {
 function copyConfig() {
     const configContent = document.getElementById('configContent').textContent;
     navigator.clipboard.writeText(configContent).then(() => {
-        alert('Configuration copied to clipboard!');
+                                    showSuccess('Configuration copied to clipboard!');
     });
 }
 </script>

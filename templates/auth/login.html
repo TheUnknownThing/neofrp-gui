@@ -21,7 +21,7 @@
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
                     <label for="username" class="sr-only">Username</label>
-                    {{ form.username(class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" + (" border-red-300" if form.username.errors else ""), placeholder="Username") }}
+                    {{ form.username(class="block w-full px-3 py-2 border border-gray-300 rounded-t-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.username.errors else ""), placeholder="Username") }}
                     {% if form.username.errors %}
                         {% for error in form.username.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -30,7 +30,7 @@
                 </div>
                 <div>
                     <label for="password" class="sr-only">Password</label>
-                    {{ form.password(class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" + (" border-red-300" if form.password.errors else ""), placeholder="Password") }}
+                    {{ form.password(class="block w-full px-3 py-2 border border-gray-300 rounded-b-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.password.errors else ""), placeholder="Password") }}
                     {% if form.password.errors %}
                         {% for error in form.password.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ error }}</p>

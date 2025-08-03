@@ -67,6 +67,17 @@ class TunnelForm(FlaskForm):
         DataRequired(message='Server port is required'),
         NumberRange(min=1, max=65535, message='Port must be between 1 and 65535')
     ])
+    
+    def validate_server_port(self, server_port):
+        """Validate server port is within the allowed range."""
+        from models import AdminSettings
+        
+        # Get port range settings
+        port_range_start = AdminSettings.get_setting('port_range_start', 20000)
+        port_range_end = AdminSettings.get_setting('port_range_end', 50000)
+        
+        if server_port.data < port_range_start or server_port.data > port_range_end:
+            raise ValidationError(f'Server port must be between {port_range_start} and {port_range_end}.')
 
 
 class ConfigurationForm(FlaskForm):
@@ -101,7 +112,14 @@ class UserEditForm(FlaskForm):
         DataRequired(message='Email is required'),
         Email(message='Invalid email address')
     ])
-    is_admin = BooleanField('Administrator')
+    user_role = SelectField('User Role', choices=[
+        ('user', 'Regular User'),
+        ('admin', 'Administrator'),
+        ('root_user', 'Root Administrator')
+    ], validators=[
+        DataRequired(message='User role is required')
+    ])
+    is_admin = BooleanField('Administrator')  # Keep for compatibility, will be auto-set
     is_active = BooleanField('Active')
     is_verified = BooleanField('Verified')
     tunnel_limit = IntegerField('Tunnel Limit', validators=[
@@ -140,6 +158,38 @@ class AdminSettingsForm(FlaskForm):
                                        description='New users must be verified by admin before they can use the system')
 
 
+class RootSettingsForm(FlaskForm):
+    """Form for root administrator settings management."""
+    website_name = StringField('Website Name', validators=[
+        DataRequired(message='Website name is required'),
+        Length(min=1, max=100, message='Website name must be between 1 and 100 characters')
+    ], default='Neofrp Admin Panel',
+    description='Name displayed in the header and browser title')
+    
+    notification_banner = TextAreaField('Notification Banner', validators=[
+        Optional(),
+        Length(max=500, message='Notification banner must be less than 500 characters')
+    ], description='Important announcement displayed at the top of all pages (leave empty to disable)')
+    
+    port_range_start = IntegerField('Port Range Start', validators=[
+        DataRequired(message='Port range start is required'),
+        NumberRange(min=1, max=65535, message='Port must be between 1 and 65535')
+    ], default=20000,
+    description='Starting port number for available tunnel ports')
+    
+    port_range_end = IntegerField('Port Range End', validators=[
+        DataRequired(message='Port range end is required'),
+        NumberRange(min=1, max=65535, message='Port must be between 1 and 65535')
+    ], default=50000,
+    description='Ending port number for available tunnel ports')
+    
+    def validate_port_range_end(self, port_range_end):
+        """Ensure end port is greater than start port."""
+        if hasattr(self, 'port_range_start') and self.port_range_start.data:
+            if port_range_end.data <= self.port_range_start.data:
+                raise ValidationError('End port must be greater than start port.')
+
+
 class AdminCreateUserForm(FlaskForm):
     """Form for admin to create new users directly."""
     username = StringField('Username', validators=[
@@ -154,7 +204,14 @@ class AdminCreateUserForm(FlaskForm):
         DataRequired(message='Password is required'),
         Length(min=8, message='Password must be at least 8 characters long')
     ])
-    is_admin = BooleanField('Administrator')
+    user_role = SelectField('User Role', choices=[
+        ('user', 'Regular User'),
+        ('admin', 'Administrator'),
+        ('root_user', 'Root Administrator')
+    ], validators=[
+        DataRequired(message='User role is required')
+    ], default='user')
+    is_admin = BooleanField('Administrator')  # Keep for compatibility, will be auto-set
     is_active = BooleanField('Active', default=True)
     is_verified = BooleanField('Verified', default=True)
     tunnel_limit = IntegerField('Tunnel Limit', validators=[

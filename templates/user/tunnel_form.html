@@ -47,7 +47,7 @@
                                     Tunnel Name
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.name(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.name.errors else ""), placeholder="e.g., Web Server, SSH Access") }}
+                                    {{ form.name(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.name.errors else ""), placeholder="e.g., Web Server, SSH Access") }}
                                 </div>
                                 {% if form.name.errors %}
                                     {% for error in form.name.errors %}
@@ -65,7 +65,7 @@
                                     Protocol
                                 </label>
                                 <div class="mt-1">
-                                    {{ form.protocol(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.protocol.errors else "")) }}
+                                    {{ form.protocol(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none bg-white" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.protocol.errors else "")) }}
                                 </div>
                                 {% if form.protocol.errors %}
                                     {% for error in form.protocol.errors %}
@@ -82,7 +82,7 @@
                                         Local Port
                                     </label>
                                     <div class="mt-1">
-                                        {{ form.local_port(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.local_port.errors else ""), placeholder="e.g., 80, 22, 3306") }}
+                                        {{ form.local_port(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.local_port.errors else ""), placeholder="e.g., 80, 22, 3306") }}
                                     </div>
                                     {% if form.local_port.errors %}
                                         {% for error in form.local_port.errors %}
@@ -100,7 +100,7 @@
                                         Server Port
                                     </label>
                                     <div class="mt-1">
-                                        {{ form.server_port(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.server_port.errors else ""), placeholder="e.g., 8080, 2222, 33060") }}
+                                        {{ form.server_port(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.server_port.errors else ""), placeholder="e.g., 8080, 2222, 33060") }}
                                     </div>
                                     {% if form.server_port.errors %}
                                         {% for error in form.server_port.errors %}
@@ -108,7 +108,7 @@
                                         {% endfor %}
                                     {% endif %}
                                     <p class="mt-2 text-sm text-gray-500">
-                                        Public port on the server.
+                                        Public port on the server. Available range: {{ port_range_start }}-{{ port_range_end }}
                                     </p>
                                 </div>
                             </div>

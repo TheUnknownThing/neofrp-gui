@@ -34,7 +34,7 @@
                                 <label for="{{ form.username.id }}" class="block text-sm font-medium text-gray-700">
                                     {{ form.username.label.text }}
                                 </label>
-                                {{ form.username(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.username.errors else "")) }}
+                                {{ form.username(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.username.errors else "")) }}
                                 {% if form.username.errors %}
                                     {% for error in form.username.errors %}
                                         <p class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -47,7 +47,7 @@
                                 <label for="{{ form.email.id }}" class="block text-sm font-medium text-gray-700">
                                     {{ form.email.label.text }}
                                 </label>
-                                {{ form.email(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.email.errors else "")) }}
+                                {{ form.email(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.email.errors else "")) }}
                                 {% if form.email.errors %}
                                     {% for error in form.email.errors %}
                                         <p class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -60,7 +60,7 @@
                                 <label for="{{ form.password.id }}" class="block text-sm font-medium text-gray-700">
                                     {{ form.password.label.text }}
                                 </label>
-                                {{ form.password(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.password.errors else "")) }}
+                                {{ form.password(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.password.errors else "")) }}
                                 {% if form.password.errors %}
                                     {% for error in form.password.errors %}
                                         <p class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -73,7 +73,7 @@
                                 <label for="{{ form.tunnel_limit.id }}" class="block text-sm font-medium text-gray-700">
                                     {{ form.tunnel_limit.label.text }}
                                 </label>
-                                {{ form.tunnel_limit(class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" + (" border-red-300" if form.tunnel_limit.errors else "")) }}
+                                {{ form.tunnel_limit(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.tunnel_limit.errors else "")) }}
                                 {% if form.tunnel_limit.errors %}
                                     {% for error in form.tunnel_limit.errors %}
                                         <p class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -88,7 +88,7 @@
                                     <div class="space-y-3">
                                         <div class="flex items-start">
                                             <div class="flex items-center h-5">
-                                                {{ form.is_active(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                                {{ form.is_active(class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
                                             </div>
                                             <div class="ml-3 text-sm">
                                                 <label for="{{ form.is_active.id }}" class="font-medium text-gray-700">
@@ -100,7 +100,7 @@
                                         
                                         <div class="flex items-start">
                                             <div class="flex items-center h-5">
-                                                {{ form.is_verified(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                                {{ form.is_verified(class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded") }}
                                             </div>
                                             <div class="ml-3 text-sm">
                                                 <label for="{{ form.is_verified.id }}" class="font-medium text-gray-700">
@@ -110,16 +110,21 @@
                                             </div>
                                         </div>
                                         
-                                        <div class="flex items-start">
-                                            <div class="flex items-center h-5">
-                                                {{ form.is_admin(class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded") }}
+                                        <div class="col-span-6">
+                                            <label for="user_role" class="block text-sm font-medium text-gray-700">
+                                                User Role
+                                            </label>
+                                            <div class="mt-1">
+                                                {{ form.user_role(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none bg-white" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.user_role.errors else "")) }}
                                             </div>
-                                            <div class="ml-3 text-sm">
-                                                <label for="{{ form.is_admin.id }}" class="font-medium text-gray-700">
-                                                    {{ form.is_admin.label.text }}
-                                                </label>
-                                                <p class="text-gray-500">User has administrator privileges</p>
-                                            </div>
+                                            {% if form.user_role.errors %}
+                                                {% for error in form.user_role.errors %}
+                                                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                                                {% endfor %}
+                                            {% endif %}
+                                            <p class="mt-2 text-sm text-gray-500">
+                                                User: Regular user access. Admin: Can manage users and tunnels. Root: Full system access including settings.
+                                            </p>
                                         </div>
                                     </div>
                                 </fieldset>

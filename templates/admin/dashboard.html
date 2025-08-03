@@ -131,7 +131,7 @@
                     <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
                         Quick Actions
                     </h3>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 {% if current_user.is_root_user %}lg:grid-cols-3{% endif %}">
                         <a href="{{ url_for('admin.settings') }}" 
                            class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                             <div class="flex-shrink-0">
@@ -141,6 +141,17 @@
                                 <p class="text-sm font-medium text-gray-900">Admin Settings</p>
                             </div>
                         </a>
+                        {% if current_user.is_root_user %}
+                        <a href="{{ url_for('admin.root_settings') }}" 
+                           class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-crown text-yellow-600"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">Root Settings</p>
+                            </div>
+                        </a>
+                        {% endif %}
                         <a href="{{ url_for('admin.create_user') }}" 
                            class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                             <div class="flex-shrink-0">
@@ -174,7 +185,7 @@
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 truncate">
                                                 {{ user.username }}
-                                                {% if user.is_admin %}
+                                                {% if user.is_administrator %}
                                                 <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
                                                     Admin
                                                 </span>
