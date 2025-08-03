@@ -3,94 +3,98 @@
 {% block title %}Neofrp - Modern Reverse Proxy{% endblock %}
 
 {% block content %}
-<div class="bg-gray-50">
-    <!-- Left-aligned content container -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
-        <!-- Hero section -->
-        <div class="max-w-4xl">
-            <h1 class="text-5xl font-bold text-gray-800 sm:text-6xl md:text-7xl mb-6">
-                Neofrp
-            </h1>
-            <div id="typewriter-description" class="text-3xl text-gray-800 min-h-[6rem] max-w-4xl mb-8">
-                <span id="typewriter-description-content"></span>
-                <span id="description-cursor" class="animate-pulse">|</span>
-            </div>
-            
-            <!-- GitHub link -->
-            <div>
-                <a href="https://github.com/RayZh-hs/neofrp" target="_blank" rel="noopener noreferrer" 
-                   class="inline-flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
-                    <i class="fab fa-github text-xl mr-3"></i>
-                    View on GitHub
-                </a>
+<div class="text-gray-200">
+    <section class="h-screen flex flex-col justify-center px-4">
+        <div class="container mx-auto max-w-4xl">
+            <div class="flex flex-col items-start">
+                <h1 class="text-5xl font-bold text-gray-900 sm:text-6xl md:text-7xl mb-6">
+                    Neofrp
+                </h1>
+
+                <div id="typing-text" class="text-2xl sm:text-3xl text-gray-700 min-h-[6em] whitespace-pre-line mb-8"></div>
+
+                <div class="flex flex-wrap gap-4">
+                    <a href="https://github.com/RayZh-hs/neofrp" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center px-3 py-2 border border-gray-300 bg-transparent text-gray-700 font-medium rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                        <i class="fab fa-github text-base mr-2"></i>
+                        Neofrp
+                    </a>
+
+                    <a href="https://github.com/TheUnknownThing/neofrp-gui" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center px-3 py-2 border border-gray-300 bg-transparent text-gray-700 font-medium rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                        <i class="fab fa-github text-base mr-2"></i>
+                        Neofrp-GUI
+                    </a>
+                    </div>
             </div>
         </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const features = [
-                "Yet another FRP solution for exposing your local services to the internet. ",
-                "High performance with Go-based architecture for maximum speed and efficiency.",
-                "Enterprise-grade security with end-to-end encryption and authentication.",
-                "Easy setup with simple configuration and intuitive management tools."
-            ];
-
-            let currentFeatureIndex = 0;
-            let currentState = 'typing'; // 'typing', 'waiting', 'deleting'
-            let currentCharIndex = 0;
-
-            const descriptionContent = document.getElementById('typewriter-description-content');
-            const descriptionCursor = document.getElementById('description-cursor');
-
-            function showDescriptionCursor() {
-                descriptionCursor.style.display = 'inline';
-            }
-
-            function typeWriter() {
-                const currentFeatureText = features[currentFeatureIndex];
-
-                switch(currentState) {
-                    case 'typing':
-                        showDescriptionCursor();
-                        descriptionContent.textContent = currentFeatureText.substring(0, currentCharIndex + 1);
-                        currentCharIndex++;
-
-                        if (currentCharIndex === currentFeatureText.length) {
-                            currentState = 'waiting';
-                            setTimeout(typeWriter, 1500); // Wait 3 seconds after completion
-                            return;
-                        }
-                        setTimeout(typeWriter, 35); // Fast typing
-                        break;
-
-                    case 'waiting':
-                        currentState = 'deleting';
-                        setTimeout(typeWriter, 300); // Brief pause before deleting
-                        break;
-
-                    case 'deleting':
-                        showDescriptionCursor();
-                        
-                        if (descriptionContent.textContent.length > 0) {
-                            descriptionContent.textContent = descriptionContent.textContent.slice(0, -1);
-                            setTimeout(typeWriter, 8); // Very fast deletion
-                        } else {
-                            // Deleted, move to next feature
-                            currentFeatureIndex = (currentFeatureIndex + 1) % features.length;
-                            currentState = 'typing';
-                            currentCharIndex = 0;
-                            setTimeout(typeWriter, 500); // Brief pause before next feature
-                            return;
-                        }
-                        break;
-                }
-            }
-
-            // Initialize
-            showDescriptionCursor();
-            typeWriter();
-        });
-    </script>
+    </section>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const typingText = document.getElementById('typing-text');
+        const messages = [
+            "Yet another FRP solution for exposing your local services to the internet.",
+            "High performance with Go-based architecture for maximum speed and efficiency.",
+            "Enterprise-grade security with end-to-end encryption and authentication.",
+            "Easy setup with simple configuration and intuitive management tools."
+        ];
+        let currentMessageIndex = 0;
+
+        // Async typing animation function
+        async function typeMessage(message) {
+            const text = message;
+            let i = 0;
+
+            // Type character by character
+            while (i < text.length) {
+                typingText.textContent += text.charAt(i);
+                i++;
+                // Typing speed changed from 50 to 35
+                await new Promise((resolve) => setTimeout(resolve, 35)); 
+            }
+
+            // Pause at the end of typing
+            // Pause duration changed from 2000 to 1500
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+
+            // Backspace animation
+            while (typingText.textContent.length > 0) {
+                typingText.textContent = typingText.textContent.slice(0, -1);
+                // Backspace speed changed from 25 to 15
+                await new Promise((resolve) => setTimeout(resolve, 15));
+            }
+
+            // Move to next message
+            currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+
+            // Start typing next message after a short pause
+            setTimeout(() => typeMessage(messages[currentMessageIndex]), 300);
+        }
+
+        // Start the typing animation
+        if (messages.length > 0) {
+            typeMessage(messages[currentMessageIndex]);
+        }
+    });
+</script>
+
+<style>
+    /* Blinking cursor effect using a CSS pseudo-element */
+    #typing-text::after {
+        content: '|';
+        animation: cursor-blink 1s step-end infinite;
+        margin-left: 0.25rem; /* Adds a small space between text and cursor */
+    }
+
+    @keyframes cursor-blink {
+        from, to {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+        }
+    }
+</style>
 {% endblock %}
