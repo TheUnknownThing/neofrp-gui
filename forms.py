@@ -131,9 +131,15 @@ class UserEditForm(FlaskForm):
         Length(min=8, message='Password must be at least 8 characters long')
     ])
     
-    def __init__(self, user_id=None, *args, **kwargs):
+    def __init__(self, user_id=None, current_user=None, *args, **kwargs):
         super(UserEditForm, self).__init__(*args, **kwargs)
         self.user_id = user_id
+        # Hide root_user option from regular admins
+        if current_user and not current_user.is_root_user:
+            self.user_role.choices = [
+                ('user', 'Regular User'),
+                ('admin', 'Administrator')
+            ]
     
     def validate_username(self, username):
         """Check if username is already taken by another user."""
@@ -218,6 +224,15 @@ class AdminCreateUserForm(FlaskForm):
         DataRequired(message='Tunnel limit is required'),
         NumberRange(min=0, max=1000, message='Tunnel limit must be between 0 and 1000')
     ], default=10)
+    
+    def __init__(self, current_user=None, *args, **kwargs):
+        super(AdminCreateUserForm, self).__init__(*args, **kwargs)
+        # Hide root_user option from regular admins
+        if current_user and not current_user.is_root_user:
+            self.user_role.choices = [
+                ('user', 'Regular User'),
+                ('admin', 'Administrator')
+            ]
     
     def validate_username(self, username):
         """Check if username is already taken."""

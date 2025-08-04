@@ -124,7 +124,7 @@
                                     </td>
                                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                         <div class="flex justify-end space-x-2">
-                                            {% if not user.is_verified %}
+                                            {% if not user.is_verified and not (user.is_root_user and not current_user.is_root_user) %}
                                             <form method="POST" action="{{ url_for('admin.verify_user', user_id=user.id) }}" class="inline">
                                                 <button type="submit" 
                                                         class="text-green-600 hover:text-green-900"
@@ -133,7 +133,7 @@
                                                     <span class="sr-only">Verify</span>
                                                 </button>
                                             </form>
-                                            {% elif user.id != current_user.id %}
+                                            {% elif user.id != current_user.id and not (user.is_root_user and not current_user.is_root_user) %}
                                             <form method="POST" action="{{ url_for('admin.unverify_user', user_id=user.id) }}" class="inline">
                                                 <button type="submit" 
                                                         class="text-yellow-600 hover:text-yellow-900"
@@ -144,20 +144,24 @@
                                                 </button>
                                             </form>
                                             {% endif %}
+                                            {% if not (user.is_root_user and not current_user.is_root_user) %}
                                             <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" 
                                                class="text-indigo-600 hover:text-indigo-900"
                                                title="Edit User">
                                                 <i class="fas fa-edit"></i>
                                                 <span class="sr-only">Edit</span>
                                             </a>
+                                            {% endif %}
+                                            {% if not (user.is_root_user and not current_user.is_root_user) %}
                                             <button type="button" 
-                                                    onclick="showTokenModal('{{ user.username }}', '{{ user.token }}', {{ user.id }})"
+                                                    onclick="showTokenModal('{{ user.username }}', '{{ user.token }}', '{{ user.id }}')"
                                                     class="text-blue-600 hover:text-blue-900"
                                                     title="View Token">
                                                 <i class="fas fa-key"></i>
                                                 <span class="sr-only">View Token</span>
                                             </button>
-                                            {% if user.id != current_user.id %}
+                                            {% endif %}
+                                            {% if user.id != current_user.id and not (user.is_root_user and not current_user.is_root_user) %}
                                             <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" 
                                                   class="inline" 
                                                   onsubmit="return confirm('Are you sure you want to delete user {{ user.username }}? This action cannot be undone.');">
@@ -305,8 +309,13 @@ function resetToken() {
     .then(data => {
         if (data.success) {
             document.getElementById('tokenValue').textContent = data.new_token;
-                                    showSuccess(data.message);
+            showSuccess(data.message);
+        } else {
+            showError(data.message);
         }
+    })
+    .catch(error => {
+        showError('Failed to reset token');
     });
 }
 </script>

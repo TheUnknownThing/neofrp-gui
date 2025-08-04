@@ -79,13 +79,18 @@ def edit_user(user_id):
     
     user = User.query.get_or_404(user_id)
     
+    # Prevent regular admins from editing root users
+    if user.is_root_user and not current_user.is_root_user:
+        flash('Only root administrators can manage root user accounts.', 'error')
+        return redirect(url_for('admin.users'))
+    
     # Prevent self-demotion from admin
     if user.id == current_user.id and user.is_admin:
         can_change_admin = False
     else:
         can_change_admin = True
     
-    form = UserEditForm(user_id=user_id, obj=user)
+    form = UserEditForm(user_id=user_id, current_user=current_user, obj=user)
     
     # Populate form with current user data on GET requests
     if request.method == 'GET':
@@ -138,6 +143,11 @@ def delete_user(user_id):
         flash('You cannot delete your own account.', 'error')
         return redirect(url_for('admin.users'))
     
+    # Prevent regular admins from deleting root users
+    if user.is_root_user and not current_user.is_root_user:
+        flash('Only root administrators can delete root user accounts.', 'error')
+        return redirect(url_for('admin.users'))
+    
     username = user.username
     db.session.delete(user)
     db.session.commit()
@@ -156,6 +166,13 @@ def reset_user_token(user_id):
     from database import db
     
     user = User.query.get_or_404(user_id)
+    
+    # Prevent regular admins from resetting root user tokens
+    if user.is_root_user and not current_user.is_root_user:
+        return jsonify({
+            'success': False,
+            'message': 'Only root administrators can reset root user tokens.'
+        }), 403
     
     old_token = user.token
     new_token = user.generate_token()
@@ -263,7 +280,7 @@ def create_user():
     from models import User
     from database import db
     
-    form = AdminCreateUserForm()
+    form = AdminCreateUserForm(current_user=current_user)
     if form.validate_on_submit():
         # Only root users can create root users
         if form.user_role.data == 'root_user' and not current_user.is_root_user:
@@ -301,6 +318,12 @@ def verify_user(user_id):
     from database import db
     
     user = User.query.get_or_404(user_id)
+    
+    # Prevent regular admins from verifying root users
+    if user.is_root_user and not current_user.is_root_user:
+        flash('Only root administrators can verify root user accounts.', 'error')
+        return redirect(url_for('admin.users'))
+    
     user.is_verified = True
     db.session.commit()
     
@@ -322,6 +345,11 @@ def unverify_user(user_id):
     # Prevent unverifying self
     if user.id == current_user.id:
         flash('You cannot unverify your own account.', 'error')
+        return redirect(url_for('admin.users'))
+    
+    # Prevent regular admins from unverifying root users
+    if user.is_root_user and not current_user.is_root_user:
+        flash('Only root administrators can unverify root user accounts.', 'error')
         return redirect(url_for('admin.users'))
     
     user.is_verified = False
