@@ -185,7 +185,11 @@
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 truncate">
                                                 {{ user.username }}
-                                                {% if user.is_administrator %}
+                                                {% if user.is_root_user %}
+                                                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                                    Root
+                                                </span>
+                                                {% elif user.is_administrator %}
                                                 <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
                                                     Admin
                                                 </span>
