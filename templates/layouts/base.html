@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}{{ website_name or 'Neofrp' }}{% endblock %}</title>
     
     <!-- Tailwind CSS -->
@@ -60,7 +61,7 @@
                         </div>
                         {% if current_user.is_authenticated %}
                         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            {% if current_user.is_admin %}
+                            {% if current_user.is_administrator %}
                             <a href="{{ url_for('admin.dashboard') }}" 
                                class="{% if request.endpoint == 'admin.dashboard' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Admin Dashboard
@@ -154,7 +155,7 @@
             <div x-show="mobileMenuOpen" x-cloak class="sm:hidden">
                 <div class="pt-2 pb-3 space-y-1">
                     {% if current_user.is_authenticated %}
-                        {% if current_user.is_admin %}
+                        {% if current_user.is_administrator %}
                         <a href="{{ url_for('admin.dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'admin.dashboard' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
                             Admin Dashboard
                         </a>
@@ -335,6 +336,9 @@
 
     <!-- Toast Notification Script -->
     <script>
+        // CSRF token helper for AJAX requests
+        window.csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
         function toastManager() {
             return {
                 toasts: [],

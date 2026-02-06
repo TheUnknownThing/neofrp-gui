@@ -5,67 +5,198 @@
 {% block content %}
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow sm:rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">
-                    Server Configuration
-                </h3>
-                <div class="mt-2 max-w-xl text-sm text-gray-500">
-                    <p>Manage your Neofrp server configuration.</p>
+        <!-- Sync Status -->
+        <div class="mb-6 rounded-md {% if sync_status.config_exists %}bg-green-50 border border-green-200{% else %}bg-yellow-50 border border-yellow-200{% endif %} p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        {% if sync_status.config_exists %}
+                        <i class="fas fa-check-circle text-green-400" aria-hidden="true"></i>
+                        {% else %}
+                        <i class="fas fa-exclamation-triangle text-yellow-400" aria-hidden="true"></i>
+                        {% endif %}
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium {% if sync_status.config_exists %}text-green-800{% else %}text-yellow-800{% endif %}">
+                            {% if sync_status.config_exists %}
+                            Server config active at: {{ sync_status.config_path }}
+                            {% else %}
+                            No server config file found. Save settings to create one.
+                            {% endif %}
+                        </h3>
+                        {% if sync_status.config_exists %}
+                        <div class="mt-1 text-sm {% if sync_status.config_exists %}text-green-700{% else %}text-yellow-700{% endif %}">
+                            <span class="mr-4">Recognized tokens: <strong>{{ sync_status.token_count }}</strong></span>
+                            <span class="mr-4">TCP ports: <strong>{{ sync_status.tcp_ports|length }}</strong></span>
+                            <span>UDP ports: <strong>{{ sync_status.udp_ports|length }}</strong></span>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="mt-5">
-                    <div class="rounded-md bg-blue-50 p-4">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-info-circle text-blue-400" aria-hidden="true"></i>
+                <div>
+                    <form method="POST" action="{{ url_for('admin.sync_server_config') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <i class="fas fa-sync-alt mr-1"></i>
+                            Sync Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+            <div class="md:col-span-1">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Server Configuration</h3>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Configure the neofrp server settings. Changes are written directly to the server configuration file and tokens/ports are synced automatically.
+                    </p>
+                    <div class="mt-4 rounded-md bg-blue-50 p-3">
+                        <p class="text-xs text-blue-700">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            After saving, restart the neofrp server for transport changes to take effect. Token and port changes are written to the config file automatically.
+                        </p>
+                    </div>
+
+                    {% if sync_status.tcp_ports or sync_status.udp_ports %}
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-gray-900">Active Ports</h4>
+                        {% if sync_status.tcp_ports %}
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-500 font-medium">TCP:</p>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                {% for port in sync_status.tcp_ports %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">{{ port }}</span>
+                                {% endfor %}
                             </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-blue-800">
-                                    Configuration Management
-                                </h3>
-                                <div class="mt-2 text-sm text-blue-700">
-                                    <p>
-                                        Server configuration management is currently handled through the server's JSON configuration file.
-                                        Future updates will include direct configuration management through this interface.
-                                    </p>
+                        </div>
+                        {% endif %}
+                        {% if sync_status.udp_ports %}
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-500 font-medium">UDP:</p>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                {% for port in sync_status.udp_ports %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">{{ port }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="shadow sm:rounded-md sm:overflow-hidden">
+                        <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                            <!-- Config File Path -->
+                            <div>
+                                <label for="server_config_path" class="block text-sm font-medium text-gray-700">
+                                    Config File Path
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.server_config_path(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="/etc/neofrp/server.json") }}
+                                </div>
+                                {% if form.server_config_path.errors %}
+                                    {% for error in form.server_config_path.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                                    {% endfor %}
+                                {% endif %}
+                                <p class="mt-1 text-xs text-gray-500">Path where the server JSON config will be written.</p>
+                            </div>
+
+                            <!-- Transport Settings -->
+                            <fieldset class="border border-gray-200 rounded-md p-4">
+                                <legend class="text-sm font-medium text-gray-700 px-2">Transport Settings</legend>
+
+                                <div class="grid grid-cols-6 gap-4 mt-2">
+                                    <div class="col-span-3">
+                                        <label for="transport_protocol" class="block text-sm font-medium text-gray-700">Protocol</label>
+                                        <div class="mt-1">
+                                            {{ form.transport_protocol(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm") }}
+                                        </div>
+                                    </div>
+                                    <div class="col-span-3">
+                                        <label for="transport_port" class="block text-sm font-medium text-gray-700">Listen Port</label>
+                                        <div class="mt-1">
+                                            {{ form.transport_port(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="3400") }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- TLS Settings -->
+                            <fieldset class="border border-gray-200 rounded-md p-4">
+                                <legend class="text-sm font-medium text-gray-700 px-2">TLS Settings</legend>
+
+                                <div class="space-y-4 mt-2">
+                                    <div>
+                                        <label for="cert_file" class="block text-sm font-medium text-gray-700">Certificate File</label>
+                                        <div class="mt-1">
+                                            {{ form.cert_file(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="/path/to/cert.pem") }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="key_file" class="block text-sm font-medium text-gray-700">Key File</label>
+                                        <div class="mt-1">
+                                            {{ form.key_file(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="/path/to/key.pem") }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="server_name" class="block text-sm font-medium text-gray-700">Server Name (SNI)</label>
+                                        <div class="mt-1">
+                                            {{ form.server_name(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="neofrp.example.com") }}
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Used for TLS verification. Also pre-filled in client config generation.</p>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Client Config Defaults -->
+                            <fieldset class="border border-gray-200 rounded-md p-4">
+                                <legend class="text-sm font-medium text-gray-700 px-2">Client Config Defaults</legend>
+
+                                <div class="mt-2">
+                                    <label for="default_ca_file" class="block text-sm font-medium text-gray-700">Default CA File Path</label>
+                                    <div class="mt-1">
+                                        {{ form.default_ca_file(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="/path/to/ca.pem") }}
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Pre-filled as ca_file when users generate client configs. Users can override this.</p>
+                                </div>
+                            </fieldset>
+
+                            <!-- Log Level -->
+                            <div>
+                                <label for="log_level" class="block text-sm font-medium text-gray-700">Log Level</label>
+                                <div class="mt-1">
+                                    {{ form.log_level(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm") }}
                                 </div>
                             </div>
                         </div>
+
+                        <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Save & Sync
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div class="mt-6">
-                        <h4 class="text-sm font-medium text-gray-900">Example Server Configuration</h4>
-                        <pre class="mt-2 bg-gray-100 rounded-md p-4 overflow-x-auto text-sm">{
-    "log": {
-        "log_level": "info"
-    },
-    "recognized_tokens": [
-        "your_secret_token_1",
-        "your_secret_token_2"
-    ],
-    "transport": {
-        "protocol": "quic",
-        "port": 3400,
-        "cert_file": "/path/to/cert.pem",
-        "key_file": "/path/to/key.pem"
-    },
-    "connections": {
-        "tcp_ports": [8080, 8081, 8082],
-        "udp_ports": [9000, 9001]
-    }
-}</pre>
-                    </div>
-                    
-                    <div class="mt-6">
-                        <h4 class="text-sm font-medium text-gray-900">Configuration Tips</h4>
-                        <ul class="mt-2 list-disc list-inside text-sm text-gray-600 space-y-1">
-                            <li>Use the templating feature to register port ranges: <code>{{ "{{ expand \"1000-1200\" }}" }}</code></li>
-                            <li>Keep your tokens secure and rotate them regularly</li>
-                            <li>Use TLS certificates for production deployments</li>
-                            <li>Monitor server logs for connection issues</li>
-                        </ul>
-                    </div>
-                </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Configuration Tips -->
+        <div class="mt-8 bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h4 class="text-sm font-medium text-gray-900">Configuration Tips</h4>
+                <ul class="mt-2 list-disc list-inside text-sm text-gray-600 space-y-1">
+                    <li>Use the templating feature in manual config edits to register port ranges: <code class="bg-gray-100 px-1 rounded">{{ "{{ expand \"1000-1200\" }}" }}</code></li>
+                    <li>Use TLS certificates for production deployments (required for both QUIC and TCP)</li>
+                    <li>Tokens and ports are synced automatically when users register or modify tunnels</li>
+                    <li>Restart the neofrp server process after changing transport or TLS settings</li>
+                </ul>
             </div>
         </div>
     </div>

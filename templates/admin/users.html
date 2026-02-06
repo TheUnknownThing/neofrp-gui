@@ -126,6 +126,7 @@
                                         <div class="flex justify-end space-x-2">
                                             {% if not user.is_verified and not (user.is_root_user and not current_user.is_root_user) %}
                                             <form method="POST" action="{{ url_for('admin.verify_user', user_id=user.id) }}" class="inline">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                 <button type="submit" 
                                                         class="text-green-600 hover:text-green-900"
                                                         title="Verify User">
@@ -135,6 +136,7 @@
                                             </form>
                                             {% elif user.id != current_user.id and not (user.is_root_user and not current_user.is_root_user) %}
                                             <form method="POST" action="{{ url_for('admin.unverify_user', user_id=user.id) }}" class="inline">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                 <button type="submit" 
                                                         class="text-yellow-600 hover:text-yellow-900"
                                                         title="Unverify User"
@@ -162,9 +164,10 @@
                                             </button>
                                             {% endif %}
                                             {% if user.id != current_user.id and not (user.is_root_user and not current_user.is_root_user) %}
-                                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" 
-                                                  class="inline" 
+                                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}"
+                                                  class="inline"
                                                   onsubmit="return confirm('Are you sure you want to delete user {{ user.username }}? This action cannot be undone.');">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                 <button type="submit" 
                                                         class="text-red-600 hover:text-red-900"
                                                         title="Delete User">
@@ -302,7 +305,8 @@ function resetToken() {
     fetch(`/admin/users/${currentUserId}/reset-token`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': window.csrfToken
         }
     })
     .then(response => response.json())

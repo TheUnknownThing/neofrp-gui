@@ -219,7 +219,8 @@ function resetUserToken() {
     fetch(`/admin/users/{{ user.id }}/reset-token`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': window.csrfToken
         }
     })
     .then(response => response.json())

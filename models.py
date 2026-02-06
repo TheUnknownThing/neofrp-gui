@@ -1,8 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import db
 import json
+
+
+def _utcnow():
+    """Return current UTC time as a timezone-aware datetime."""
+    return datetime.now(timezone.utc)
 
 
 class User(UserMixin, db.Model):
@@ -19,7 +24,7 @@ class User(UserMixin, db.Model):
     is_verified = db.Column(db.Boolean, default=True)  # For admin verification requirement
     tunnel_limit = db.Column(db.Integer, default=10)  # Default limit of 10 tunnels per user
     token = db.Column(db.String(128), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=_utcnow)
     last_login = db.Column(db.DateTime)
     
     # Relationships
@@ -72,15 +77,15 @@ class Tunnel(db.Model):
     local_port = db.Column(db.Integer, nullable=False)
     server_port = db.Column(db.Integer, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    created_at = db.Column(db.DateTime, default=_utcnow)
+    updated_at = db.Column(db.DateTime, default=_utcnow, onupdate=_utcnow)
+
     # Constraints
     __table_args__ = (
         db.UniqueConstraint('user_id', 'name', name='_user_tunnel_name_uc'),
-        db.CheckConstraint('protocol IN ("tcp", "udp")', name='_protocol_check'),
-        db.CheckConstraint('local_port BETWEEN 1 AND 65535', name='_local_port_check'),
-        db.CheckConstraint('server_port BETWEEN 1 AND 65535', name='_server_port_check'),
+        db.CheckConstraint("protocol IN ('tcp', 'udp')", name='_tunnel_protocol_check'),
+        db.CheckConstraint('local_port BETWEEN 1 AND 65535', name='_tunnel_local_port_check'),
+        db.CheckConstraint('server_port BETWEEN 1 AND 65535', name='_tunnel_server_port_check'),
     )
     
     def to_dict(self):
@@ -106,14 +111,14 @@ class Configuration(db.Model):
     server_port = db.Column(db.Integer, nullable=False)
     transport_protocol = db.Column(db.String(10), default='quic')  # 'quic' or 'tcp'
     config_json = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    created_at = db.Column(db.DateTime, default=_utcnow)
+    updated_at = db.Column(db.DateTime, default=_utcnow, onupdate=_utcnow)
+
     # Constraints
     __table_args__ = (
         db.UniqueConstraint('user_id', 'name', name='_user_config_name_uc'),
-        db.CheckConstraint('transport_protocol IN ("quic", "tcp")', name='_transport_check'),
-        db.CheckConstraint('server_port BETWEEN 1 AND 65535', name='_server_port_check'),
+        db.CheckConstraint("transport_protocol IN ('quic', 'tcp')", name='_config_transport_check'),
+        db.CheckConstraint('server_port BETWEEN 1 AND 65535', name='_config_server_port_check'),
     )
     
     def get_config(self):
@@ -135,8 +140,8 @@ class AdminSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     setting_key = db.Column(db.String(64), unique=True, nullable=False)
     setting_value = db.Column(db.Text, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    updated_at = db.Column(db.DateTime, default=_utcnow, onupdate=_utcnow)
+
     @staticmethod
     def get_setting(key, default=None):
         """Get setting value by key."""
@@ -165,7 +170,7 @@ class AdminSettings(db.Model):
         else:
             setting.setting_value = value
             
-        setting.updated_at = datetime.utcnow()
+        setting.updated_at = _utcnow()
         db.session.commit()
         return setting
     

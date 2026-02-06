@@ -100,6 +100,14 @@ class ConfigurationForm(FlaskForm):
     ], validators=[
         DataRequired(message='Transport protocol is required')
     ])
+    server_name = StringField('Server Name (SNI)', validators=[
+        Optional(),
+        Length(max=255)
+    ])
+    ca_file = StringField('CA File Path', validators=[
+        Optional(),
+        Length(max=512)
+    ])
 
 
 class UserEditForm(FlaskForm):
@@ -119,7 +127,6 @@ class UserEditForm(FlaskForm):
     ], validators=[
         DataRequired(message='User role is required')
     ])
-    is_admin = BooleanField('Administrator')  # Keep for compatibility, will be auto-set
     is_active = BooleanField('Active')
     is_verified = BooleanField('Verified')
     tunnel_limit = IntegerField('Tunnel Limit', validators=[
@@ -217,14 +224,13 @@ class AdminCreateUserForm(FlaskForm):
     ], validators=[
         DataRequired(message='User role is required')
     ], default='user')
-    is_admin = BooleanField('Administrator')  # Keep for compatibility, will be auto-set
     is_active = BooleanField('Active', default=True)
     is_verified = BooleanField('Verified', default=True)
     tunnel_limit = IntegerField('Tunnel Limit', validators=[
         DataRequired(message='Tunnel limit is required'),
         NumberRange(min=0, max=1000, message='Tunnel limit must be between 0 and 1000')
     ], default=10)
-    
+
     def __init__(self, current_user=None, *args, **kwargs):
         super(AdminCreateUserForm, self).__init__(*args, **kwargs)
         # Hide root_user option from regular admins
@@ -233,15 +239,55 @@ class AdminCreateUserForm(FlaskForm):
                 ('user', 'Regular User'),
                 ('admin', 'Administrator')
             ]
-    
+
     def validate_username(self, username):
         """Check if username is already taken."""
         user = User.query.filter_by(username=username.data).first()
         if user:
             raise ValidationError('Username already taken. Please choose another one.')
-    
+
     def validate_email(self, email):
         """Check if email is already registered."""
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('Email already registered. Please use another one.')
+
+
+class ServerConfigForm(FlaskForm):
+    """Form for neofrp server configuration management."""
+    server_config_path = StringField('Server Config File Path', validators=[
+        DataRequired(message='Config file path is required'),
+        Length(min=1, max=512)
+    ], default='/etc/neofrp/server.json')
+    transport_protocol = SelectField('Transport Protocol', choices=[
+        ('quic', 'QUIC (UDP-based)'),
+        ('tcp', 'TCP with TLS')
+    ], validators=[
+        DataRequired(message='Transport protocol is required')
+    ])
+    transport_port = IntegerField('Server Listen Port', validators=[
+        DataRequired(message='Server listen port is required'),
+        NumberRange(min=1, max=65535, message='Port must be between 1 and 65535')
+    ], default=3400)
+    cert_file = StringField('TLS Certificate File', validators=[
+        Optional(),
+        Length(max=512)
+    ])
+    key_file = StringField('TLS Key File', validators=[
+        Optional(),
+        Length(max=512)
+    ])
+    server_name = StringField('Server Name (SNI)', validators=[
+        Optional(),
+        Length(max=255)
+    ])
+    default_ca_file = StringField('Default CA File Path (for client configs)', validators=[
+        Optional(),
+        Length(max=512)
+    ])
+    log_level = SelectField('Log Level', choices=[
+        ('info', 'Info'),
+        ('debug', 'Debug'),
+        ('warn', 'Warning'),
+        ('error', 'Error')
+    ], default='info')

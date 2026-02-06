@@ -125,6 +125,31 @@
                                 </p>
                             </div>
 
+                            <!-- TLS Settings -->
+                            <fieldset class="border border-gray-200 rounded-md p-4">
+                                <legend class="text-sm font-medium text-gray-700 px-2">TLS Settings</legend>
+                                <div class="space-y-4 mt-2">
+                                    <div>
+                                        <label for="server_name" class="block text-sm font-medium text-gray-700">
+                                            Server Name (SNI)
+                                        </label>
+                                        <div class="mt-1">
+                                            {{ form.server_name(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="neofrp.example.com") }}
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">The hostname in the server's TLS certificate for verification.</p>
+                                    </div>
+                                    <div>
+                                        <label for="ca_file" class="block text-sm font-medium text-gray-700">
+                                            CA File Path
+                                        </label>
+                                        <div class="mt-1">
+                                            {{ form.ca_file(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="/path/to/ca.pem") }}
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Path to the CA certificate file on the client machine.</p>
+                                    </div>
+                                </div>
+                            </fieldset>
+
                             <!-- Preview -->
                             {% if active_tunnels %}
                             <div>
@@ -175,20 +200,27 @@ function updatePreview() {
     const serverIp = document.getElementById('server_ip').value || 'your.server.ip';
     const serverPort = document.getElementById('server_port').value || '3400';
     const protocol = document.getElementById('transport_protocol').value || 'quic';
-    
+    const serverName = document.getElementById('server_name').value || '';
+    const caFile = document.getElementById('ca_file').value || '';
+
+    const transport = {
+        "protocol": protocol,
+        "server_ip": serverIp,
+        "server_port": parseInt(serverPort)
+    };
+
+    if (caFile) transport["ca_file"] = caFile;
+    if (serverName) transport["server_name"] = serverName;
+
     const config = {
         "log": {
             "log_level": "info"
         },
         "token": userToken,
-        "transport": {
-            "protocol": protocol,
-            "server_ip": serverIp,
-            "server_port": parseInt(serverPort)
-        },
+        "transport": transport,
         "connections": tunnels
     };
-    
+
     document.getElementById('configPreview').textContent = JSON.stringify(config, null, 2);
 }
 
@@ -196,6 +228,8 @@ function updatePreview() {
 document.getElementById('server_ip').addEventListener('input', updatePreview);
 document.getElementById('server_port').addEventListener('input', updatePreview);
 document.getElementById('transport_protocol').addEventListener('change', updatePreview);
+document.getElementById('server_name').addEventListener('input', updatePreview);
+document.getElementById('ca_file').addEventListener('input', updatePreview);
 
 // Initial preview
 updatePreview();

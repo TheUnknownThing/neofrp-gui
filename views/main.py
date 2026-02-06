@@ -9,7 +9,7 @@ def index():
     """Homepage route."""
     if current_user.is_authenticated:
         # Redirect authenticated users to their dashboard
-        if current_user.is_admin:
+        if current_user.is_administrator:
             return redirect(url_for('admin.dashboard'))
         else:
             return redirect(url_for('user.dashboard'))
