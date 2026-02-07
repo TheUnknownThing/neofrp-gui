@@ -26,14 +26,24 @@
                         </h3>
                         {% if sync_status.config_exists %}
                         <div class="mt-1 text-sm {% if sync_status.config_exists %}text-green-700{% else %}text-yellow-700{% endif %}">
-                            <span class="mr-4">Recognized tokens: <strong>{{ sync_status.token_count }}</strong></span>
                             <span class="mr-4">TCP ports: <strong>{{ sync_status.tcp_ports|length }}</strong></span>
-                            <span>UDP ports: <strong>{{ sync_status.udp_ports|length }}</strong></span>
+                            <span class="mr-4">UDP ports: <strong>{{ sync_status.udp_ports|length }}</strong></span>
+                            {% if sync_status.server_running %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-circle text-green-500 text-xs mr-1" aria-hidden="true"></i>
+                                Server Running
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                                <i class="fas fa-circle text-gray-400 text-xs mr-1" aria-hidden="true"></i>
+                                Server Not Detected
+                            </span>
+                            {% endif %}
                         </div>
                         {% endif %}
                     </div>
                 </div>
-                <div>
+                <div class="flex gap-2">
                     <form method="POST" action="{{ url_for('admin.sync_server_config') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -41,6 +51,15 @@
                             Sync Now
                         </button>
                     </form>
+                    {% if sync_status.server_running %}
+                    <form method="POST" action="{{ url_for('admin.reload_server_config') }}" onsubmit="return confirm('Reload server configuration? Token and port access changes will take effect immediately.');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-indigo-300 shadow-sm text-xs font-medium rounded text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <i class="fas fa-redo mr-1"></i>
+                            Reload Config
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -55,19 +74,27 @@
                     <div class="mt-4 rounded-md bg-blue-50 p-3">
                         <p class="text-xs text-blue-700">
                             <i class="fas fa-info-circle mr-1"></i>
-                            After saving, restart the neofrp server for transport changes to take effect. Token and port changes are written to the config file automatically.
+                            <strong>Sync</strong> writes token and port changes to the config file. <strong>Reload</strong> signals the running server to apply changes immediately (SIGHUP). Transport changes still require a server restart.
                         </p>
                     </div>
 
                     {% if sync_status.tcp_ports or sync_status.udp_ports %}
                     <div class="mt-6">
                         <h4 class="text-sm font-medium text-gray-900">Active Ports</h4>
+                        <p class="text-xs text-gray-500 mt-1">Per-port token authentication enabled</p>
                         {% if sync_status.tcp_ports %}
                         <div class="mt-2">
                             <p class="text-xs text-gray-500 font-medium">TCP:</p>
                             <div class="flex flex-wrap gap-1 mt-1">
-                                {% for port in sync_status.tcp_ports %}
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">{{ port }}</span>
+                                {% for port_config in sync_status.tcp_ports %}
+                                {% if port_config is mapping %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800" title="Token(s): {{ port_config.tokens|length }}">
+                                    {{ port_config.port }}
+                                    <span class="ml-1 text-blue-600">({{ port_config.tokens|length }})</span>
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">{{ port_config }}</span>
+                                {% endif %}
                                 {% endfor %}
                             </div>
                         </div>
@@ -76,8 +103,15 @@
                         <div class="mt-2">
                             <p class="text-xs text-gray-500 font-medium">UDP:</p>
                             <div class="flex flex-wrap gap-1 mt-1">
-                                {% for port in sync_status.udp_ports %}
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">{{ port }}</span>
+                                {% for port_config in sync_status.udp_ports %}
+                                {% if port_config is mapping %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" title="Token(s): {{ port_config.tokens|length }}">
+                                    {{ port_config.port }}
+                                    <span class="ml-1 text-green-600">({{ port_config.tokens|length }})</span>
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">{{ port_config }}</span>
+                                {% endif %}
                                 {% endfor %}
                             </div>
                         </div>

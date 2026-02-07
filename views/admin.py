@@ -122,7 +122,7 @@ def edit_user(user_id):
 
         # Sync tokens if active/verified status changed
         if old_active != user.is_active or old_verified != user.is_verified:
-            if not ServerConfigManager.sync_tokens():
+            if not ServerConfigManager.sync_all():
                 flash('User updated but server config sync failed. Check server logs.', 'warning')
 
         flash(f'User {user.username} has been updated successfully.', 'success')
@@ -191,7 +191,7 @@ def reset_user_token(user_id):
     db.session.commit()
 
     # Sync tokens so the server recognizes the new token
-    if not ServerConfigManager.sync_tokens():
+    if not ServerConfigManager.sync_all():
         return jsonify({
             'success': True,
             'message': f'Token reset for {user.username} but server sync failed.',
@@ -307,7 +307,7 @@ def create_user():
         db.session.commit()
 
         # Sync tokens so backend recognizes the new user
-        if not ServerConfigManager.sync_tokens():
+        if not ServerConfigManager.sync_all():
             flash('User created but server config sync failed. Check server logs.', 'warning')
 
         flash(f'User {user.username} created successfully.', 'success')
@@ -336,7 +336,7 @@ def verify_user(user_id):
     db.session.commit()
 
     # Sync tokens since verified users can now connect
-    if not ServerConfigManager.sync_tokens():
+    if not ServerConfigManager.sync_all():
         flash('User verified but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {user.username} has been verified.', 'success')
@@ -367,7 +367,7 @@ def unverify_user(user_id):
     db.session.commit()
 
     # Sync tokens since unverified users should no longer connect
-    if not ServerConfigManager.sync_tokens():
+    if not ServerConfigManager.sync_all():
         flash('User unverified but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {user.username} has been unverified.', 'success')
@@ -441,9 +441,9 @@ def server_config():
     sync_status = {
         'config_exists': config is not None,
         'config_path': AdminSettings.get_setting('server_config_path', '/etc/neofrp/server.json'),
-        'token_count': len(config.get('recognized_tokens', [])) if config else 0,
         'tcp_ports': config.get('connections', {}).get('tcp_ports', []) if config else [],
         'udp_ports': config.get('connections', {}).get('udp_ports', []) if config else [],
+        'server_running': ServerConfigManager.get_server_pid() is not None,
     }
 
     return render_template('admin/server_config.html', form=form, sync_status=sync_status)
@@ -463,5 +463,33 @@ def sync_server_config():
     else:
         flash('Failed to sync server configuration. Check server logs.', 'error')
         logger.error(f'Root user {current_user.username} failed to sync server config')
+
+    return redirect(url_for('admin.server_config'))
+
+@admin_bp.route('/server-config/reload', methods=['POST'])
+@login_required
+@root_user_required
+def reload_server_config():
+    """Trigger hot reload of the neofrp server configuration.
+
+    Sends SIGHUP to the running neofrp server process to reload its
+    configuration without a full restart. Token and port access changes
+    take effect immediately.
+    """
+    from server_manager import ServerConfigManager
+
+    pid = ServerConfigManager.get_server_pid()
+    if pid is None:
+        flash('Cannot reload: neofrp server process not found.', 'error')
+        return redirect(url_for('admin.server_config'))
+
+    success = ServerConfigManager.trigger_reload()
+
+    if success:
+        flash(f'Configuration reloaded successfully (server PID: {pid}).', 'success')
+        logger.info(f'Root user {current_user.username} triggered server config reload')
+    else:
+        flash('Failed to reload server configuration. Check server logs.', 'error')
+        logger.error(f'Root user {current_user.username} failed to reload server config')
 
     return redirect(url_for('admin.server_config'))

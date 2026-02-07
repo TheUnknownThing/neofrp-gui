@@ -139,7 +139,7 @@ def register():
             flash('As the first user, you have been granted root administrator privileges.', 'info')
 
         # Sync tokens to server config so backend recognizes the new user
-        ServerConfigManager.sync_tokens()
+        ServerConfigManager.sync_all()
 
         logger.info(f'New user registered: {user.username}')
 
