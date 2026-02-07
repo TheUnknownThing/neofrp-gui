@@ -83,6 +83,7 @@ class Tunnel(db.Model):
     # Constraints
     __table_args__ = (
         db.UniqueConstraint('user_id', 'name', name='_user_tunnel_name_uc'),
+        db.UniqueConstraint('server_port', name='_tunnel_server_port_uc'),
         db.CheckConstraint("protocol IN ('tcp', 'udp')", name='_tunnel_protocol_check'),
         db.CheckConstraint('local_port BETWEEN 1 AND 65535', name='_tunnel_local_port_check'),
         db.CheckConstraint('server_port BETWEEN 1 AND 65535', name='_tunnel_server_port_check'),

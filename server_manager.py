@@ -37,19 +37,26 @@ class ServerConfigManager:
 
     @staticmethod
     def write_config(config):
-        """Write configuration to file atomically."""
+        """Write configuration to file atomically with secure permissions."""
         config_path = ServerConfigManager.get_config_path()
         config_dir = os.path.dirname(config_path)
 
         try:
-            os.makedirs(config_dir, exist_ok=True)
+            os.makedirs(config_dir, mode=0o755, exist_ok=True)
 
             # Write to temp file first, then rename for atomicity
             fd, tmp_path = tempfile.mkstemp(dir=config_dir, suffix='.json.tmp')
             try:
+                # Set secure permissions (owner read/write only)
+                os.chmod(tmp_path, 0o600)
+
                 with os.fdopen(fd, 'w') as f:
                     json.dump(config, f, indent=4)
+
+                # Atomically replace the old config
                 os.replace(tmp_path, config_path)
+                # Ensure final file has correct permissions
+                os.chmod(config_path, 0o600)
             except Exception:
                 # Clean up temp file on failure
                 if os.path.exists(tmp_path):

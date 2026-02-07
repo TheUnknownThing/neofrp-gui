@@ -3,98 +3,42 @@
 {% block title %}Neofrp - Modern Reverse Proxy{% endblock %}
 
 {% block content %}
-<div class="text-gray-200">
-    <section class="flex flex-col justify-center px-4 pt-36">
-        <div class="container mx-auto max-w-4xl">
-            <div class="flex flex-col items-start">
-                <h1 class="text-5xl font-bold text-gray-900 sm:text-6xl md:text-7xl mb-6">
-                    Neofrp
-                </h1>
+<!-- Hero Section -->
+<div class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div class="text-center">
+            <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold text-gray-900 tracking-tight">
+                <span class="block">Neofrp</span>
+                <span class="block text-indigo-600 text-4xl sm:text-5xl md:text-6xl mt-2">Modern Reverse Proxy</span>
+            </h1>
 
-                <div id="typing-text" class="text-2xl sm:text-3xl text-gray-700 min-h-[6em] whitespace-pre-line mb-8"></div>
+            <div class="mt-10 flex justify-center gap-4 flex-wrap">
+                <a href="{{ url_for('auth.register') }}"
+                   class="px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                    Get Started
+                </a>
+                <a href="{{ url_for('auth.login') }}"
+                   class="px-8 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 shadow-md hover:shadow-lg transition-all duration-200">
+                    Sign In
+                </a>
+            </div>
 
-                <div class="flex flex-wrap gap-4">
-                    <a href="https://github.com/RayZh-hs/neofrp" target="_blank" rel="noopener noreferrer" 
-                       class="inline-flex items-center px-3 py-2 border border-gray-300 bg-transparent text-gray-700 font-medium rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200">
-                        <i class="fab fa-github text-base mr-2"></i>
-                        Neofrp
-                    </a>
-
-                    <a href="https://github.com/TheUnknownThing/neofrp-gui" target="_blank" rel="noopener noreferrer" 
-                       class="inline-flex items-center px-3 py-2 border border-gray-300 bg-transparent text-gray-700 font-medium rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200">
-                        <i class="fab fa-github text-base mr-2"></i>
-                        Neofrp-GUI
-                    </a>
-                    </div>
+            <div class="mt-8 flex justify-center gap-4 flex-wrap">
+                <a href="https://github.com/RayZh-hs/neofrp" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="fab fa-github text-lg mr-2"></i>
+                    <span>Neofrp</span>
+                </a>
+                <span class="text-gray-300">|</span>
+                <a href="https://github.com/TheUnknownThing/neofrp-gui" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="fab fa-github text-lg mr-2"></i>
+                    <span>Neofrp-GUI</span>
+                </a>
             </div>
         </div>
-    </section>
+    </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const typingText = document.getElementById('typing-text');
-        const messages = [
-            "Yet another FRP solution for exposing your local services to the internet.",
-            "High performance with Go-based architecture for maximum speed and efficiency.",
-            "Enterprise-grade security with end-to-end encryption and authentication.",
-            "Easy setup with simple configuration and intuitive management tools."
-        ];
-        let currentMessageIndex = 0;
 
-        // Async typing animation function
-        async function typeMessage(message) {
-            const text = message;
-            let i = 0;
-
-            // Type character by character
-            while (i < text.length) {
-                typingText.textContent += text.charAt(i);
-                i++;
-                // Typing speed changed from 50 to 35
-                await new Promise((resolve) => setTimeout(resolve, 35)); 
-            }
-
-            // Pause at the end of typing
-            // Pause duration changed from 2000 to 1500
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-
-            // Backspace animation
-            while (typingText.textContent.length > 0) {
-                typingText.textContent = typingText.textContent.slice(0, -1);
-                // Backspace speed changed from 25 to 15
-                await new Promise((resolve) => setTimeout(resolve, 15));
-            }
-
-            // Move to next message
-            currentMessageIndex = (currentMessageIndex + 1) % messages.length;
-
-            // Start typing next message after a short pause
-            setTimeout(() => typeMessage(messages[currentMessageIndex]), 300);
-        }
-
-        // Start the typing animation
-        if (messages.length > 0) {
-            typeMessage(messages[currentMessageIndex]);
-        }
-    });
-</script>
-
-<style>
-    /* Blinking cursor effect using a CSS pseudo-element */
-    #typing-text::after {
-        content: '|';
-        animation: cursor-blink 1s step-end infinite;
-        margin-left: 0.25rem; /* Adds a small space between text and cursor */
-    }
-
-    @keyframes cursor-blink {
-        from, to {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0;
-        }
-    }
-</style>
 {% endblock %}

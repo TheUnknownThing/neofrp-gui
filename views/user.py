@@ -1,12 +1,23 @@
+import re
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, Response
 from flask_login import login_required, current_user
-from forms import TunnelForm, ConfigurationForm
+from forms import TunnelForm, ConfigurationForm, ChangePasswordForm
 import json
 import logging
 from datetime import datetime, timezone
 
 user_bp = Blueprint('user', __name__)
 logger = logging.getLogger(__name__)
+
+# Import limiter for rate limiting
+from app import limiter
+
+
+def _sanitize_filename(name):
+    """Sanitize a string for use in Content-Disposition filename."""
+    # Remove any characters that are not alphanumeric, dash, underscore, or dot
+    return re.sub(r'[^\w\-.]', '_', name)
+
 
 @user_bp.route('/dashboard')
 @login_required
@@ -51,6 +62,7 @@ def new_tunnel():
     from models import Tunnel
     from database import db
     from server_manager import ServerConfigManager
+    from sqlalchemy.exc import IntegrityError
 
     form = TunnelForm()
 
@@ -90,10 +102,16 @@ def new_tunnel():
         )
 
         db.session.add(tunnel)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash('Server port conflict. Please choose a different port.', 'error')
+            return render_template('user/tunnel_form.html', form=form, title='New Tunnel')
 
         # Sync ports to server config so the backend opens the new port
-        ServerConfigManager.sync_ports()
+        if not ServerConfigManager.sync_ports():
+            flash('Tunnel created but server config sync failed. Contact an administrator.', 'warning')
 
         flash(f'Tunnel "{tunnel.name}" created successfully!', 'success')
         logger.info(f'User {current_user.username} created tunnel {tunnel.name}')
@@ -109,6 +127,7 @@ def edit_tunnel(tunnel_id):
     from models import Tunnel
     from database import db
     from server_manager import ServerConfigManager
+    from sqlalchemy.exc import IntegrityError
 
     tunnel = Tunnel.query.filter_by(id=tunnel_id, user_id=current_user.id).first_or_404()
     form = TunnelForm(obj=tunnel)
@@ -147,10 +166,19 @@ def edit_tunnel(tunnel_id):
         tunnel.server_port = form.server_port.data
         tunnel.updated_at = datetime.now(timezone.utc)
 
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash('Server port conflict. Please choose a different port.', 'error')
+            return render_template('user/tunnel_form.html',
+                                 form=form,
+                                 title='Edit Tunnel',
+                                 tunnel=tunnel)
 
         # Sync ports to server config in case port or protocol changed
-        ServerConfigManager.sync_ports()
+        if not ServerConfigManager.sync_ports():
+            flash('Tunnel updated but server config sync failed. Contact an administrator.', 'warning')
 
         flash(f'Tunnel "{tunnel.name}" updated successfully!', 'success')
         logger.info(f'User {current_user.username} updated tunnel {tunnel.name}')
@@ -177,7 +205,8 @@ def toggle_tunnel(tunnel_id):
     db.session.commit()
 
     # Sync ports since active status changed
-    ServerConfigManager.sync_ports()
+    if not ServerConfigManager.sync_ports():
+        logger.warning(f'Failed to sync ports after toggling tunnel {tunnel.name}')
 
     status = 'activated' if tunnel.is_active else 'deactivated'
     logger.info(f'User {current_user.username} {status} tunnel {tunnel.name}')
@@ -203,7 +232,8 @@ def delete_tunnel(tunnel_id):
     db.session.commit()
 
     # Sync ports since a tunnel was removed
-    ServerConfigManager.sync_ports()
+    if not ServerConfigManager.sync_ports():
+        flash('Tunnel deleted but server config sync failed. Contact an administrator.', 'warning')
 
     flash(f'Tunnel "{tunnel_name}" deleted successfully.', 'success')
     logger.info(f'User {current_user.username} deleted tunnel {tunnel_name}')
@@ -238,6 +268,31 @@ def generate_config():
             form.ca_file.data = default_ca_file
 
     if form.validate_on_submit():
+        # Get server settings from admin configuration (not user input)
+        from server_manager import ServerConfigManager
+
+        server_ip = AdminSettings.get_setting('server_ip', '')
+        if not server_ip:
+            flash('Server IP/domain not configured. Please contact an administrator.', 'error')
+            active_tunnels = current_user.tunnels.filter_by(is_active=True).all()
+            return render_template('user/generate_config.html',
+                                 form=form,
+                                 active_tunnels=active_tunnels,
+                                 user_token=current_user.token)
+
+        # Get transport settings from server config
+        server_config = ServerConfigManager.read_config()
+        if not server_config or 'transport' not in server_config:
+            flash('Server transport not configured. Please contact an administrator.', 'error')
+            active_tunnels = current_user.tunnels.filter_by(is_active=True).all()
+            return render_template('user/generate_config.html',
+                                 form=form,
+                                 active_tunnels=active_tunnels,
+                                 user_token=current_user.token)
+
+        transport_protocol = server_config['transport'].get('protocol', 'quic')
+        server_port = server_config['transport'].get('port', 3400)
+
         # Get user's active tunnels
         active_tunnels = current_user.tunnels.filter_by(is_active=True).all()
 
@@ -260,9 +315,9 @@ def generate_config():
 
         # Build configuration JSON matching backend's ClientConfig format
         transport_config = {
-            "protocol": form.transport_protocol.data,
-            "server_ip": form.server_ip.data,
-            "server_port": form.server_port.data
+            "protocol": transport_protocol,
+            "server_ip": server_ip,
+            "server_port": server_port
         }
 
         # Add TLS fields required for QUIC/TLS connections
@@ -280,13 +335,13 @@ def generate_config():
             "connections": [tunnel.to_dict() for tunnel in active_tunnels]
         }
 
-        # Save configuration
+        # Save configuration (store admin settings for audit trail)
         config = Configuration(
             user_id=current_user.id,
             name=form.name.data,
-            server_ip=form.server_ip.data,
-            server_port=form.server_port.data,
-            transport_protocol=form.transport_protocol.data
+            server_ip=server_ip,
+            server_port=server_port,
+            transport_protocol=transport_protocol
         )
         config.set_config(config_data)
 
@@ -301,10 +356,20 @@ def generate_config():
     # Get active tunnels for preview
     active_tunnels = current_user.tunnels.filter_by(is_active=True).all()
 
+    # Get server info from admin settings for display
+    from server_manager import ServerConfigManager
+    server_ip = AdminSettings.get_setting('server_ip', 'Not configured yet')
+    server_config = ServerConfigManager.read_config()
+    server_port = server_config['transport'].get('port', 3400) if server_config and 'transport' in server_config else 'Not configured'
+    transport_protocol = server_config['transport'].get('protocol', 'quic') if server_config and 'transport' in server_config else 'Not configured'
+
     return render_template('user/generate_config.html',
                          form=form,
                          active_tunnels=active_tunnels,
-                         user_token=current_user.token)
+                         user_token=current_user.token,
+                         server_ip=server_ip,
+                         server_port=server_port,
+                         transport_protocol=transport_protocol)
 
 @user_bp.route('/configurations/<int:config_id>/download')
 @login_required
@@ -317,11 +382,12 @@ def download_config(config_id):
         user_id=current_user.id
     ).first_or_404()
 
+    safe_name = _sanitize_filename(config.name)
     response = Response(
         config.config_json,
         mimetype='application/json',
         headers={
-            'Content-Disposition': f'attachment; filename="{config.name}.json"'
+            'Content-Disposition': f'attachment; filename="{safe_name}.json"'
         }
     )
 
@@ -353,3 +419,30 @@ def delete_config(config_id):
 def profile():
     """User profile page."""
     return render_template('user/profile.html')
+
+@user_bp.route('/change-password', methods=['GET', 'POST'])
+@login_required
+@limiter.limit("5 per hour")
+def change_password():
+    """Allow users to change their own password."""
+    from database import db
+
+    form = ChangePasswordForm()
+
+    if form.validate_on_submit():
+        # Verify current password
+        if not current_user.check_password(form.current_password.data):
+            flash('Current password is incorrect.', 'error')
+            return render_template('user/change_password.html', form=form)
+
+        # Set new password
+        current_user.set_password(form.new_password.data)
+        db.session.commit()
+
+        flash('Password changed successfully!', 'success')
+        logger.info(f'User {current_user.username} changed their password')
+
+        return redirect(url_for('user.profile'))
+
+    return render_template('user/change_password.html', form=form)
+

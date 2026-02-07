@@ -115,7 +115,7 @@
 <script>
 let configs = {
     {% for config in configurations %}
-    {{ config.id }}: {{ config.config_json | safe }},
+    {{ config.id }}: {{ config.get_config() | tojson }},
     {% endfor %}
 };
 

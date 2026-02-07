@@ -9,9 +9,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="text-center">
                 <h1 class="text-4xl font-bold text-gray-900 mb-4">Neofrp Documentation</h1>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Complete guide to setting up and using Neofrp for secure reverse proxy tunneling
-                </p>
             </div>
         </div>
     </div>
@@ -39,7 +36,6 @@
                     <div class="bg-gray-50 rounded-lg p-4">
                         <ul class="space-y-2 text-gray-700">
                             <li><span class="font-semibold">Name:</span> A descriptive identifier for your tunnel</li>
-                            <li><span class="font-semibold">Protocol:</span> TCP or UDP</li>
                             <li><span class="font-semibold">Local Port:</span> The port on your local machine</li>
                             <li><span class="font-semibold">Server Port:</span> The public port on the server</li>
                         </ul>
@@ -139,64 +135,6 @@
                         <span>Consider using additional authentication for exposed services</span>
                     </li>
                 </ul>
-            </div>
-        </div>
-
-        <!-- Troubleshooting Section -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <div class="flex items-center mb-6">
-                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                    <i class="fas fa-tools text-yellow-600"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900">Troubleshooting</h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
-                        Connection Issues
-                    </h3>
-                    <ul class="space-y-2 text-gray-700">
-                        <li class="flex items-start">
-                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
-                            <span>Verify the server IP and port are correct</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
-                            <span>Check if the local service is running</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
-                            <span>Ensure the server ports are not blocked by firewall</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-arrow-right text-yellow-600 mr-2 mt-1 text-xs"></i>
-                            <span>Confirm your authentication token is valid</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="bg-orange-50 rounded-lg p-6 border border-orange-200">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-tachometer-alt text-orange-600 mr-2"></i>
-                        Performance Issues
-                    </h3>
-                    <ul class="space-y-2 text-gray-700">
-                        <li class="flex items-start">
-                            <i class="fas fa-arrow-right text-orange-600 mr-2 mt-1 text-xs"></i>
-                            <span>Try switching between QUIC and TCP protocols</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-arrow-right text-orange-600 mr-2 mt-1 text-xs"></i>
-                            <span>Check your network bandwidth and latency</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-arrow-right text-orange-600 mr-2 mt-1 text-xs"></i>
-                            <span>Consider using a server closer to your location</span>
-                        </li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>

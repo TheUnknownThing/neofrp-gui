@@ -7,7 +7,29 @@ import logging
 auth_bp = Blueprint('auth', __name__)
 logger = logging.getLogger(__name__)
 
+# Import limiter for rate limiting
+from app import limiter
+
+
+def _is_safe_redirect_url(target):
+    """Validate that the redirect URL is safe (same-origin, no scheme tricks)."""
+    if not target:
+        return False
+    # Reject URLs with backslashes (browsers interpret \ as /)
+    if '\\' in target:
+        return False
+    parsed = urlparse(target)
+    # Only allow relative paths (no scheme, no netloc)
+    if parsed.scheme or parsed.netloc:
+        return False
+    # Must start with / to be a relative path on the same host
+    if not target.startswith('/'):
+        return False
+    return True
+
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     """User login route."""
     if current_user.is_authenticated:
@@ -43,7 +65,7 @@ def login():
 
         # Redirect to next page or appropriate dashboard
         next_page = request.args.get('next')
-        if not next_page or urlparse(next_page).netloc != '':
+        if not _is_safe_redirect_url(next_page):
             if user.is_administrator:
                 next_page = url_for('admin.dashboard')
             else:
@@ -54,6 +76,7 @@ def login():
     return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
+@limiter.limit("3 per hour")
 def register():
     """User registration route."""
     if current_user.is_authenticated:
@@ -63,6 +86,7 @@ def register():
     from models import User, AdminSettings
     from database import db
     from server_manager import ServerConfigManager
+    from sqlalchemy.exc import IntegrityError
 
     # Check if registration is enabled
     registration_enabled = AdminSettings.get_setting('registration_enabled', True)
@@ -82,17 +106,37 @@ def register():
         user.set_password(form.password.data)
         user.generate_token()
 
-        # First user becomes root user and is automatically verified
-        if User.query.count() == 0:
+        # First user becomes root user and is automatically verified.
+        # Use IntegrityError handling to guard against the race condition
+        # where two users register simultaneously as the "first user".
+        is_first_user = User.query.count() == 0
+        if is_first_user:
             user.set_role('root_user')
             user.is_verified = True
-            flash('As the first user, you have been granted root administrator privileges.', 'info')
         else:
             # Set verification status based on admin settings
             user.is_verified = not require_verification
 
         db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash('Username or email already taken. Please try again.', 'error')
+            return render_template('auth/register.html', form=form)
+
+        # If we promoted this user to root but another user already exists
+        # (race condition), demote back to normal user
+        if is_first_user and User.query.count() > 1:
+            first_user = User.query.order_by(User.id.asc()).first()
+            if first_user.id != user.id:
+                user.set_role('user')
+                user.is_verified = not require_verification
+                db.session.commit()
+            else:
+                flash('As the first user, you have been granted root administrator privileges.', 'info')
+        elif is_first_user:
+            flash('As the first user, you have been granted root administrator privileges.', 'info')
 
         # Sync tokens to server config so backend recognizes the new user
         ServerConfigManager.sync_tokens()
@@ -108,7 +152,7 @@ def register():
 
     return render_template('auth/register.html', form=form)
 
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', methods=['POST'])
 def logout():
     """User logout route."""
     if current_user.is_authenticated:

@@ -86,20 +86,8 @@ class ConfigurationForm(FlaskForm):
         DataRequired(message='Configuration name is required'),
         Length(min=1, max=128, message='Name must be between 1 and 128 characters')
     ])
-    server_ip = StringField('Server IP/Domain', validators=[
-        DataRequired(message='Server IP or domain is required'),
-        Length(min=1, max=255)
-    ])
-    server_port = IntegerField('Server Port', validators=[
-        DataRequired(message='Server port is required'),
-        NumberRange(min=1, max=65535, message='Port must be between 1 and 65535')
-    ])
-    transport_protocol = SelectField('Transport Protocol', choices=[
-        ('quic', 'QUIC (UDP-based)'),
-        ('tcp', 'TCP with TLS')
-    ], validators=[
-        DataRequired(message='Transport protocol is required')
-    ])
+    # Note: server_ip, server_port, and transport_protocol are now admin-controlled
+    # and fetched from AdminSettings instead of user input
     server_name = StringField('Server Name (SNI)', validators=[
         Optional(),
         Length(max=255)
@@ -108,6 +96,7 @@ class ConfigurationForm(FlaskForm):
         Optional(),
         Length(max=512)
     ])
+
 
 
 class UserEditForm(FlaskForm):
@@ -161,6 +150,21 @@ class UserEditForm(FlaskForm):
             raise ValidationError('Email already registered.')
 
 
+class ChangePasswordForm(FlaskForm):
+    """Form for users to change their own password."""
+    current_password = PasswordField('Current Password', validators=[
+        DataRequired(message='Current password is required')
+    ])
+    new_password = PasswordField('New Password', validators=[
+        DataRequired(message='New password is required'),
+        Length(min=8, message='Password must be at least 8 characters long')
+    ])
+    confirm_password = PasswordField('Confirm New Password', validators=[
+        DataRequired(message='Please confirm your new password'),
+        EqualTo('new_password', message='Passwords must match')
+    ])
+
+
 class AdminSettingsForm(FlaskForm):
     """Form for admin settings management."""
     registration_enabled = BooleanField('Allow New Registrations', 
@@ -176,7 +180,7 @@ class RootSettingsForm(FlaskForm):
     website_name = StringField('Website Name', validators=[
         DataRequired(message='Website name is required'),
         Length(min=1, max=100, message='Website name must be between 1 and 100 characters')
-    ], default='Neofrp Admin Panel',
+    ], default='Neofrp',
     description='Name displayed in the header and browser title')
     
     notification_banner = TextAreaField('Notification Banner', validators=[
@@ -285,6 +289,10 @@ class ServerConfigForm(FlaskForm):
         Optional(),
         Length(max=512)
     ])
+    server_ip = StringField('Server IP/Domain (for client configs)', validators=[
+        Optional(),
+        Length(max=255)
+    ], description='Public IP address or domain name that clients should connect to')
     log_level = SelectField('Log Level', choices=[
         ('info', 'Info'),
         ('debug', 'Debug'),

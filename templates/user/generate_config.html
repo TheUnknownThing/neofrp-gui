@@ -75,55 +75,50 @@
                             </div>
 
                             <!-- Server Details -->
-                            <div class="grid grid-cols-6 gap-6">
-                                <!-- Server IP/Domain -->
-                                <div class="col-span-6 sm:col-span-4">
-                                    <label for="server_ip" class="block text-sm font-medium text-gray-700">
-                                        Server IP/Domain
-                                    </label>
-                                    <div class="mt-1">
-                                        {{ form.server_ip(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.server_ip.errors else ""), placeholder="e.g., example.com or 192.168.1.100") }}
+                            <!-- Server Connection Settings (Admin-Controlled) -->
+                            <fieldset class="border border-blue-200 bg-blue-50 rounded-md p-4">
+                                <legend class="text-sm font-medium text-blue-900 px-2">Server Connection Settings</legend>
+                                <p class="text-xs text-blue-700 mb-3">These settings are configured by your administrator and cannot be changed.</p>
+
+                                <div class="grid grid-cols-6 gap-6">
+                                    <!-- Server IP/Domain (Read-only) -->
+                                    <div class="col-span-6 sm:col-span-4">
+                                        <label class="block text-sm font-medium text-gray-700">
+                                            Server IP/Domain
+                                        </label>
+                                        <div class="mt-1  px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700 font-mono text-sm">
+                                            {{ server_ip }}
+                                        </div>
                                     </div>
-                                    {% if form.server_ip.errors %}
-                                        {% for error in form.server_ip.errors %}
-                                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
-                                        {% endfor %}
-                                    {% endif %}
+
+                                    <!-- Server Port (Read-only) -->
+                                    <div class="col-span-6 sm:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700">
+                                            Server Port
+                                        </label>
+                                        <div class="mt-1 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700 font-mono text-sm">
+                                            {{ server_port }}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Server Port -->
-                                <div class="col-span-6 sm:col-span-2">
-                                    <label for="server_port" class="block text-sm font-medium text-gray-700">
-                                        Server Port
+                                <!-- Transport Protocol (Read-only) -->
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        Transport Protocol
                                     </label>
-                                    <div class="mt-1">
-                                        {{ form.server_port(class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.server_port.errors else ""), placeholder="3400") }}
+                                    <div class="mt-1 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700 font-mono text-sm uppercase">
+                                        {{ transport_protocol }}
                                     </div>
-                                    {% if form.server_port.errors %}
-                                        {% for error in form.server_port.errors %}
-                                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
-                                        {% endfor %}
-                                    {% endif %}
+                                    <p class="mt-2 text-sm text-gray-500">
+                                        {% if transport_protocol == 'quic' %}
+                                            QUIC provides better performance and is recommended for most use cases.
+                                        {% elif transport_protocol == 'tcp' %}
+                                            TCP with TLS provides compatibility with environments that block UDP.
+                                        {% endif %}
+                                    </p>
                                 </div>
-                            </div>
-
-                            <!-- Transport Protocol -->
-                            <div>
-                                <label for="transport_protocol" class="block text-sm font-medium text-gray-700">
-                                    Transport Protocol
-                                </label>
-                                <div class="mt-1">
-                                                                            {{ form.transport_protocol(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none bg-white" + (" border-red-300 focus:border-red-500 focus:ring-red-500" if form.transport_protocol.errors else "")) }}
-                                </div>
-                                {% if form.transport_protocol.errors %}
-                                    {% for error in form.transport_protocol.errors %}
-                                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
-                                    {% endfor %}
-                                {% endif %}
-                                <p class="mt-2 text-sm text-gray-500">
-                                    QUIC is recommended for better performance, TCP for compatibility.
-                                </p>
-                            </div>
+                            </fieldset>
 
                             <!-- TLS Settings -->
                             <fieldset class="border border-gray-200 rounded-md p-4">
@@ -145,7 +140,7 @@
                                         <div class="mt-1">
                                             {{ form.ca_file(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="/path/to/ca.pem") }}
                                         </div>
-                                        <p class="mt-1 text-xs text-gray-500">Path to the CA certificate file on the client machine.</p>
+                                        <p class="mt-1 text-xs text-gray-500">Path to the CA certificate file on client machine. (Omit it if you don't know what it is.)</p>
                                     </div>
                                 </div>
                             </fieldset>
@@ -194,19 +189,22 @@ const tunnels = [
     {% endfor %}
 ];
 
-const userToken = "{{ user_token }}";
+const userToken = {{ user_token | tojson }};
 
 function updatePreview() {
-    const serverIp = document.getElementById('server_ip').value || 'your.server.ip';
-    const serverPort = document.getElementById('server_port').value || '3400';
-    const protocol = document.getElementById('transport_protocol').value || 'quic';
+    // Get server settings from admin (read-only)
+    const serverIp = '{{ server_ip }}';
+    const serverPort = {{ server_port if server_port != 'Not configured' else 0 }};
+    const protocol = '{{ transport_protocol }}';
+
+    // Get TLS settings from form (user can customize)
     const serverName = document.getElementById('server_name').value || '';
     const caFile = document.getElementById('ca_file').value || '';
 
     const transport = {
         "protocol": protocol,
         "server_ip": serverIp,
-        "server_port": parseInt(serverPort)
+        "server_port": serverPort
     };
 
     if (caFile) transport["ca_file"] = caFile;
@@ -224,10 +222,7 @@ function updatePreview() {
     document.getElementById('configPreview').textContent = JSON.stringify(config, null, 2);
 }
 
-// Update preview on form change
-document.getElementById('server_ip').addEventListener('input', updatePreview);
-document.getElementById('server_port').addEventListener('input', updatePreview);
-document.getElementById('transport_protocol').addEventListener('change', updatePreview);
+// Update preview on form change (only for TLS settings - server settings are admin-controlled)
 document.getElementById('server_name').addEventListener('input', updatePreview);
 document.getElementById('ca_file').addEventListener('input', updatePreview);
 

@@ -166,6 +166,14 @@
                                     </div>
                                     <p class="mt-1 text-xs text-gray-500">Pre-filled as ca_file when users generate client configs. Users can override this.</p>
                                 </div>
+
+                                <div class="mt-4">
+                                    <label for="server_ip" class="block text-sm font-medium text-gray-700">Server IP/Domain</label>
+                                    <div class="mt-1">
+                                        {{ form.server_ip(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="server.example.com or 192.168.1.100") }}
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">Public IP address or domain name that clients will connect to. This is pre-filled in client configs and not editable by users.</p>
+                                </div>
                             </fieldset>
 
                             <!-- Log Level -->
@@ -184,19 +192,6 @@
                         </div>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <!-- Configuration Tips -->
-        <div class="mt-8 bg-white shadow sm:rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-                <h4 class="text-sm font-medium text-gray-900">Configuration Tips</h4>
-                <ul class="mt-2 list-disc list-inside text-sm text-gray-600 space-y-1">
-                    <li>Use the templating feature in manual config edits to register port ranges: <code class="bg-gray-100 px-1 rounded">{{ "{{ expand \"1000-1200\" }}" }}</code></li>
-                    <li>Use TLS certificates for production deployments (required for both QUIC and TCP)</li>
-                    <li>Tokens and ports are synced automatically when users register or modify tunnels</li>
-                    <li>Restart the neofrp server process after changing transport or TLS settings</li>
-                </ul>
             </div>
         </div>
     </div>

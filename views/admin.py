@@ -122,7 +122,8 @@ def edit_user(user_id):
 
         # Sync tokens if active/verified status changed
         if old_active != user.is_active or old_verified != user.is_verified:
-            ServerConfigManager.sync_tokens()
+            if not ServerConfigManager.sync_tokens():
+                flash('User updated but server config sync failed. Check server logs.', 'warning')
 
         flash(f'User {user.username} has been updated successfully.', 'success')
         logger.info(f'Admin {current_user.username} updated user {user.username}')
@@ -160,7 +161,8 @@ def delete_user(user_id):
     db.session.commit()
 
     # Sync both tokens and ports since user's tunnels are also deleted
-    ServerConfigManager.sync_all()
+    if not ServerConfigManager.sync_all():
+        flash('User deleted but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {username} has been deleted.', 'success')
     logger.info(f'Admin {current_user.username} deleted user {username}')
@@ -189,7 +191,12 @@ def reset_user_token(user_id):
     db.session.commit()
 
     # Sync tokens so the server recognizes the new token
-    ServerConfigManager.sync_tokens()
+    if not ServerConfigManager.sync_tokens():
+        return jsonify({
+            'success': True,
+            'message': f'Token reset for {user.username} but server sync failed.',
+            'new_token': new_token
+        })
 
     logger.info(f'Admin {current_user.username} reset token for user {user.username}')
 
@@ -262,7 +269,7 @@ def root_settings():
         return redirect(url_for('admin.root_settings'))
 
     if request.method == 'GET':
-        form.website_name.data = AdminSettings.get_setting('website_name', 'Neofrp Admin Panel')
+        form.website_name.data = AdminSettings.get_setting('website_name', 'Neofrp')
         form.notification_banner.data = AdminSettings.get_setting('notification_banner', '')
         form.port_range_start.data = AdminSettings.get_setting('port_range_start', 20000)
         form.port_range_end.data = AdminSettings.get_setting('port_range_end', 50000)
@@ -300,7 +307,8 @@ def create_user():
         db.session.commit()
 
         # Sync tokens so backend recognizes the new user
-        ServerConfigManager.sync_tokens()
+        if not ServerConfigManager.sync_tokens():
+            flash('User created but server config sync failed. Check server logs.', 'warning')
 
         flash(f'User {user.username} created successfully.', 'success')
         logger.info(f'Admin {current_user.username} created new user: {user.username}')
@@ -328,7 +336,8 @@ def verify_user(user_id):
     db.session.commit()
 
     # Sync tokens since verified users can now connect
-    ServerConfigManager.sync_tokens()
+    if not ServerConfigManager.sync_tokens():
+        flash('User verified but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {user.username} has been verified.', 'success')
     logger.info(f'Admin {current_user.username} verified user {user.username}')
@@ -358,7 +367,8 @@ def unverify_user(user_id):
     db.session.commit()
 
     # Sync tokens since unverified users should no longer connect
-    ServerConfigManager.sync_tokens()
+    if not ServerConfigManager.sync_tokens():
+        flash('User unverified but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {user.username} has been unverified.', 'success')
     logger.info(f'Admin {current_user.username} unverified user {user.username}')
@@ -381,14 +391,17 @@ def server_config():
         AdminSettings.set_setting('server_config_path', form.server_config_path.data)
         AdminSettings.set_setting('server_name', form.server_name.data)
         AdminSettings.set_setting('default_ca_file', form.default_ca_file.data)
+        AdminSettings.set_setting('server_ip', form.server_ip.data)
 
         # Update server config file
-        ServerConfigManager.update_transport(
+        if not ServerConfigManager.update_transport(
             protocol=form.transport_protocol.data,
             port=form.transport_port.data,
             cert_file=form.cert_file.data,
             key_file=form.key_file.data
-        )
+        ):
+            flash('Failed to update transport settings. Check server logs.', 'error')
+            return redirect(url_for('admin.server_config'))
 
         # Update log level in server config
         config = ServerConfigManager.read_config()
@@ -399,9 +412,10 @@ def server_config():
             ServerConfigManager.write_config(config)
 
         # Full sync to ensure tokens and ports are up to date
-        ServerConfigManager.sync_all()
-
-        flash('Server configuration updated and synced successfully.', 'success')
+        if ServerConfigManager.sync_all():
+            flash('Server configuration updated and synced successfully.', 'success')
+        else:
+            flash('Server configuration saved but sync failed. Check server logs.', 'warning')
         logger.info(f'Root user {current_user.username} updated server configuration')
 
         return redirect(url_for('admin.server_config'))
@@ -411,6 +425,7 @@ def server_config():
         form.server_config_path.data = AdminSettings.get_setting('server_config_path', '/etc/neofrp/server.json')
         form.server_name.data = AdminSettings.get_setting('server_name', '')
         form.default_ca_file.data = AdminSettings.get_setting('default_ca_file', '')
+        form.server_ip.data = AdminSettings.get_setting('server_ip', '')
 
         config = ServerConfigManager.read_config()
         if config:

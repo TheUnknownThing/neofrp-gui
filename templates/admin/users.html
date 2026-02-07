@@ -155,8 +155,8 @@
                                             </a>
                                             {% endif %}
                                             {% if not (user.is_root_user and not current_user.is_root_user) %}
-                                            <button type="button" 
-                                                    onclick="showTokenModal('{{ user.username }}', '{{ user.token }}', '{{ user.id }}')"
+                                            <button type="button"
+                                                    onclick="showTokenModal({{ user.username | tojson }}, {{ user.token | tojson }}, {{ user.id | tojson }})"
                                                     class="text-blue-600 hover:text-blue-900"
                                                     title="View Token">
                                                 <i class="fas fa-key"></i>

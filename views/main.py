@@ -1,8 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, jsonify
 from flask_login import current_user
+from datetime import datetime, timezone
 import markdown
+import logging
 
 main_bp = Blueprint('main', __name__)
+
+# Import csrf for health check exemption
+from app import csrf
 
 @main_bp.route('/')
 def index():
@@ -71,3 +76,31 @@ focusing on speed, multiplexing, and secure transport protocols.
 def docs():
     """Documentation page."""
     return render_template('docs.html')
+
+@main_bp.route('/health')
+@csrf.exempt
+def health():
+    """Health check endpoint for monitoring systems."""
+    from database import db
+    logger = logging.getLogger(__name__)
+
+    status = {
+        'status': 'healthy',
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'checks': {}
+    }
+
+    # Database connectivity check
+    try:
+        db.session.execute(db.text('SELECT 1'))
+        status['checks']['database'] = 'ok'
+    except Exception as e:
+        status['status'] = 'unhealthy'
+        status['checks']['database'] = 'error'
+        logger.error(f'Health check database error: {e}')
+
+    # Application check (always passes if we got here)
+    status['checks']['application'] = 'ok'
+
+    http_code = 200 if status['status'] == 'healthy' else 503
+    return jsonify(status), http_code
