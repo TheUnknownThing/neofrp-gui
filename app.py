@@ -25,7 +25,7 @@ load_dotenv()
 
 def create_app(config_name='production'):
     """Create and configure the Flask application."""
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='public', static_url_path='/static')
 
     # Store config name for later use
     app.config['CONFIG_ENV'] = config_name

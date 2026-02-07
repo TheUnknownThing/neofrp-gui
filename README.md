@@ -20,10 +20,11 @@ A modern web-based administration panel for managing Neofrp reverse proxy users 
 
 ### Setup
 
-1. **Clone the repository** (if not already done):
+1. **Clone the repository and initialize submodules** (if not already done):
    ```bash
-   git clone https://github.com/RayZh-hs/neofrp/
-   cd neofrp-gui/neofrp-admin
+   git clone https://github.com/theunknownthing/neofrp-gui/
+   cd neofrp-gui
+   git submodule update --init --recursive
    ```
 
 2. **Create a virtual environment** (recommended):
@@ -48,6 +49,14 @@ A modern web-based administration panel for managing Neofrp reverse proxy users 
    python init_db.py
    ```
 
+Alternatively, skip steps 2 through 5 by using the provided development run script:
+
+```bash
+./run-dev.sh
+```
+
+This will set up the environment, install dependencies, initialize the database, and start the application in development mode.
+
 ## Running the Application
 
 ### Development Mode
@@ -56,7 +65,11 @@ A modern web-based administration panel for managing Neofrp reverse proxy users 
 python app.py
 ```
 
-The application will be available at `http://localhost:5000`
+The application will be available at `http://localhost:5000`. You can also use the provided development run script:
+
+```bash
+./run-dev.sh
+```
 
 ### Production Mode
 
@@ -152,6 +165,12 @@ Contributions are welcome! Please follow these steps:
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
+
+## Attributions
+
+- This project uses [Flask](https://flask.palletsprojects.com/) for the backend and [Tailwind CSS](https://tailwindcss.com/) for the frontend design.
+- The UI is designed for the [Neofrp Project](https://github.com/rayzh-hs/neofrp).
+- Favicon made by <a href="https://www.flaticon.com/free-icons/share-link" title="share link icons">bsd on Flaticon</a>.
 
 ## License
 
