@@ -202,29 +202,53 @@ class ServerConfigManager:
 
     @staticmethod
     def get_server_pid():
-        """Get the PID of the running neofrp server process.
+        """Get the PID of the running neofrp-server systemd service.
 
-        Searches for the 'frps' process by name.
-        Returns the PID if found, None otherwise.
+        Uses systemctl to query the exact neofrp-server service status,
+        avoiding confusion with other frps instances on the machine.
+        Returns the PID if service is running, None otherwise.
         """
+        import subprocess
+
         try:
-            import psutil
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                try:
-                    # Check if process is the neofrp server (frps)
-                    if proc.info['name'] == 'frps':
-                        return proc.info['pid']
-                    # Also check cmdline in case binary has different name
-                    cmdline = proc.info.get('cmdline') or []
-                    if any('frps' in arg for arg in cmdline):
-                        return proc.info['pid']
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
-        except ImportError:
-            logger.warning('psutil not installed, cannot find server PID')
+            # Query systemd for the neofrp-server service
+            result = subprocess.run(
+                ['systemctl', 'show', 'neofrp-server',
+                 '--property=MainPID', '--property=ActiveState'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            if result.returncode != 0:
+                logger.debug('systemctl query failed, service may not exist')
+                return None
+
+            # Parse the output
+            props = {}
+            for line in result.stdout.strip().split('\n'):
+                if '=' in line:
+                    key, value = line.split('=', 1)
+                    props[key] = value
+
+            active_state = props.get('ActiveState', '')
+            main_pid = props.get('MainPID', '0')
+
+            # Service must be active and have a valid PID
+            if active_state == 'active' and main_pid.isdigit() and int(main_pid) > 0:
+                return int(main_pid)
+
+            return None
+
+        except subprocess.TimeoutExpired:
+            logger.warning('systemctl query timed out')
+            return None
+        except FileNotFoundError:
+            logger.debug('systemctl not found, not a systemd system')
+            return None
         except Exception as e:
-            logger.error(f'Error finding server PID: {e}')
-        return None
+            logger.error(f'Error querying neofrp-server service: {e}')
+            return None
 
     @staticmethod
     def trigger_reload():
