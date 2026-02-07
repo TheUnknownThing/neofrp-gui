@@ -122,7 +122,7 @@ def edit_user(user_id):
 
         # Sync tokens if active/verified status changed
         if old_active != user.is_active or old_verified != user.is_verified:
-            if not ServerConfigManager.sync_all():
+            if not ServerConfigManager.sync_and_reload():
                 flash('User updated but server config sync failed. Check server logs.', 'warning')
 
         flash(f'User {user.username} has been updated successfully.', 'success')
@@ -161,7 +161,7 @@ def delete_user(user_id):
     db.session.commit()
 
     # Sync both tokens and ports since user's tunnels are also deleted
-    if not ServerConfigManager.sync_all():
+    if not ServerConfigManager.sync_and_reload():
         flash('User deleted but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {username} has been deleted.', 'success')
@@ -191,7 +191,7 @@ def reset_user_token(user_id):
     db.session.commit()
 
     # Sync tokens so the server recognizes the new token
-    if not ServerConfigManager.sync_all():
+    if not ServerConfigManager.sync_and_reload():
         return jsonify({
             'success': True,
             'message': f'Token reset for {user.username} but server sync failed.',
@@ -307,7 +307,7 @@ def create_user():
         db.session.commit()
 
         # Sync tokens so backend recognizes the new user
-        if not ServerConfigManager.sync_all():
+        if not ServerConfigManager.sync_and_reload():
             flash('User created but server config sync failed. Check server logs.', 'warning')
 
         flash(f'User {user.username} created successfully.', 'success')
@@ -336,7 +336,7 @@ def verify_user(user_id):
     db.session.commit()
 
     # Sync tokens since verified users can now connect
-    if not ServerConfigManager.sync_all():
+    if not ServerConfigManager.sync_and_reload():
         flash('User verified but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {user.username} has been verified.', 'success')
@@ -367,7 +367,7 @@ def unverify_user(user_id):
     db.session.commit()
 
     # Sync tokens since unverified users should no longer connect
-    if not ServerConfigManager.sync_all():
+    if not ServerConfigManager.sync_and_reload():
         flash('User unverified but server config sync failed. Check server logs.', 'warning')
 
     flash(f'User {user.username} has been unverified.', 'success')

@@ -91,12 +91,32 @@ class ServerConfigManager:
 
     @staticmethod
     def sync_ports():
-        """Sync all active tunnel ports to server config.
+        """Sync all active tunnel ports to server config and trigger reload.
 
         Uses per-port token format where each port includes its owner's token.
-        This is a convenience wrapper around sync_all().
+        Automatically triggers SIGHUP reload if server is running.
         """
-        return ServerConfigManager.sync_all()
+        return ServerConfigManager.sync_and_reload()
+
+    @staticmethod
+    def sync_and_reload():
+        """Sync config and trigger hot reload if server is running.
+
+        This is the preferred method for automated syncs (e.g., when users
+        add/edit/delete tunnels) as it applies changes immediately.
+        """
+        sync_success = ServerConfigManager.sync_all()
+        if not sync_success:
+            return False
+
+        # Attempt to reload - if server not running, that's OK
+        reload_success = ServerConfigManager.trigger_reload()
+        if reload_success:
+            logger.info('Config synced and server reloaded')
+        else:
+            logger.debug('Config synced (server not running, reload skipped)')
+
+        return True
 
     @staticmethod
     def sync_all():
