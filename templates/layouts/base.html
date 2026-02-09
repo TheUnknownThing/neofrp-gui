@@ -76,6 +76,10 @@
                                class="{% if request.endpoint == 'admin.server_config' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Server Config
                             </a>
+                            <a href="{{ url_for('admin.server_logs') }}"
+                               class="{% if request.endpoint == 'admin.server_logs' %}border-indigo-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                Server Logs
+                            </a>
                             {% endif %}
                             {% endif %}
                             <a href="{{ url_for('user.dashboard') }}" 
@@ -166,6 +170,9 @@
                         {% if current_user.is_root_user %}
                         <a href="{{ url_for('admin.server_config') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'admin.server_config' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
                             Server Config
+                        </a>
+                        <a href="{{ url_for('admin.server_logs') }}" class="block pl-3 pr-4 py-2 border-l-4 {% if request.endpoint == 'admin.server_logs' %}border-indigo-500 text-indigo-700 bg-indigo-50{% else %}border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700{% endif %} text-base font-medium">
+                            Server Logs
                         </a>
                         {% endif %}
                         {% endif %}

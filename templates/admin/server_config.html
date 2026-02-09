@@ -217,6 +217,38 @@
                                     {{ form.log_level(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm") }}
                                 </div>
                             </div>
+
+                            <!-- Server Logs -->
+                            <fieldset class="border border-gray-200 rounded-md p-4">
+                                <legend class="text-sm font-medium text-gray-700 px-2">Server Logs</legend>
+
+                                <div class="grid grid-cols-6 gap-4 mt-2">
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="log_source" class="block text-sm font-medium text-gray-700">Log Source</label>
+                                        <div class="mt-1">
+                                            {{ form.log_source(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm") }}
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Used by the Server Logs viewer.</p>
+                                    </div>
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="log_file_path" class="block text-sm font-medium text-gray-700">Log File Path</label>
+                                        <div class="mt-1">
+                                            {{ form.log_file_path(class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder="/var/log/neofrp/server.log") }}
+                                        </div>
+                                        {% if form.log_file_path.errors %}
+                                            {% for error in form.log_file_path.errors %}
+                                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <a href="{{ url_for('admin.server_logs') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                        View Server Logs →
+                                    </a>
+                                </div>
+                            </fieldset>
                         </div>
 
                         <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">

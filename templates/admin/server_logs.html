@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Server Logs - Neofrp Admin{% endblock %}
+
+{% block content %}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900">Server Logs</h1>
+                <p class="mt-1 text-sm text-gray-600">Source: <span class="font-medium text-gray-900">{{ log_source }}</span></p>
+            </div>
+            <div class="flex items-center gap-2">
+                <form method="GET" class="flex items-center gap-2">
+                    <label for="lines" class="text-sm text-gray-700">Lines</label>
+                    <select id="lines" name="lines" class="block w-28 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        {% for n in [50, 100, 200, 500, 1000, 2000] %}
+                        <option value="{{ n }}" {% if lines == n %}selected{% endif %}>{{ n }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh
+                    </button>
+                    <a href="{{ url_for('admin.server_logs', lines=lines, download=1) }}" class="inline-flex items-center px-3 py-2 border border-indigo-300 shadow-sm text-sm font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <i class="fas fa-download mr-2"></i>
+                        Download
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="mt-4 rounded-md bg-yellow-50 border border-yellow-200 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-400" aria-hidden="true"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">Unable to read server logs</h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>{{ error }}</p>
+                        <p class="mt-2">If neofrp-server is not managed by systemd, set <strong>Log Source</strong> to <strong>Log file path</strong> in Server Config.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-sm font-medium text-gray-900">Latest {{ lines }} lines</h2>
+                <a href="{{ url_for('admin.server_config') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Server Config →</a>
+            </div>
+            <div class="p-4">
+                <pre class="text-xs leading-5 text-gray-900 whitespace-pre-wrap break-words max-h-[70vh] overflow-auto">{% if log_text %}{{ log_text }}{% else %}(no log output){% endif %}</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from functools import wraps
 import logging
 
+from flask import Response
+
 admin_bp = Blueprint('admin', __name__)
 logger = logging.getLogger(__name__)
 
@@ -392,6 +394,8 @@ def server_config():
         AdminSettings.set_setting('server_name', form.server_name.data)
         AdminSettings.set_setting('default_ca_file', form.default_ca_file.data)
         AdminSettings.set_setting('server_ip', form.server_ip.data)
+        AdminSettings.set_setting('server_log_source', form.log_source.data)
+        AdminSettings.set_setting('server_log_file_path', (form.log_file_path.data or '').strip())
 
         # Update server config file
         if not ServerConfigManager.update_transport(
@@ -426,6 +430,8 @@ def server_config():
         form.server_name.data = AdminSettings.get_setting('server_name', '')
         form.default_ca_file.data = AdminSettings.get_setting('default_ca_file', '')
         form.server_ip.data = AdminSettings.get_setting('server_ip', '')
+        form.log_source.data = AdminSettings.get_setting('server_log_source', 'journal')
+        form.log_file_path.data = AdminSettings.get_setting('server_log_file_path', '')
 
         config = ServerConfigManager.read_config()
         if config:
@@ -447,6 +453,44 @@ def server_config():
     }
 
     return render_template('admin/server_config.html', form=form, sync_status=sync_status)
+
+
+@admin_bp.route('/server-logs', methods=['GET'])
+@login_required
+@root_user_required
+def server_logs():
+    """View neofrp server logs (root administrators only)."""
+    from server_manager import ServerConfigManager
+
+    lines = request.args.get('lines', 200, type=int)
+    if lines < 50:
+        lines = 50
+    if lines > 2000:
+        lines = 2000
+
+    download = request.args.get('download', '0') == '1'
+
+    log_text, source_label, error = ServerConfigManager.read_server_logs(max_lines=lines)
+
+    if download:
+        content = log_text or ''
+        if error:
+            content = f'[error reading logs: {error}]\n\n' + content
+        return Response(
+            content,
+            mimetype='text/plain; charset=utf-8',
+            headers={
+                'Content-Disposition': 'attachment; filename="neofrp-server.log"'
+            }
+        )
+
+    return render_template(
+        'admin/server_logs.html',
+        log_text=log_text,
+        log_source=source_label,
+        error=error,
+        lines=lines,
+    )
 
 @admin_bp.route('/server-config/sync', methods=['POST'])
 @login_required

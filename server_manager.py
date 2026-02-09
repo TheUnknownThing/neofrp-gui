@@ -9,12 +9,134 @@ import json
 import os
 import logging
 import tempfile
+import stat
 
 logger = logging.getLogger(__name__)
 
 
 class ServerConfigManager:
     """Manages the neofrp server configuration file."""
+
+    @staticmethod
+    def get_log_source():
+        """Get server log source setting.
+
+        Supported: 'journal' (systemd journalctl for neofrp-server), 'file' (log file path).
+        Defaults to 'journal'.
+        """
+        from models import AdminSettings
+        value = AdminSettings.get_setting('server_log_source', 'journal')
+        return value if value in ('journal', 'file') else 'journal'
+
+    @staticmethod
+    def get_log_file_path():
+        """Get server log file path setting (used when log source is 'file')."""
+        from models import AdminSettings
+        return AdminSettings.get_setting('server_log_file_path', '')
+
+    @staticmethod
+    def _tail_file(file_path: str, max_lines: int, max_bytes: int = 1024 * 1024) -> str:
+        """Tail a text file efficiently.
+
+        - Reads from the end of file.
+        - Caps total bytes read to prevent memory issues.
+        """
+        if max_lines <= 0:
+            return ''
+
+        real_path = os.path.realpath(file_path)
+        try:
+            st = os.stat(real_path)
+        except OSError as e:
+            raise OSError(f'Unable to stat log file: {e}')
+
+        if not stat.S_ISREG(st.st_mode):
+            raise OSError('Log path is not a regular file')
+
+        # Read from end in blocks until we have enough lines or hit max_bytes
+        block_size = 8192
+        data = b''
+        bytes_read = 0
+        with open(real_path, 'rb') as f:
+            f.seek(0, os.SEEK_END)
+            file_size = f.tell()
+            offset = file_size
+            while offset > 0 and data.count(b'\n') <= max_lines and bytes_read < max_bytes:
+                read_size = min(block_size, offset)
+                offset -= read_size
+                f.seek(offset)
+                chunk = f.read(read_size)
+                data = chunk + data
+                bytes_read += len(chunk)
+
+        # Keep last max_lines lines
+        lines = data.splitlines()[-max_lines:]
+        text = b'\n'.join(lines).decode('utf-8', errors='replace')
+        return text
+
+    @staticmethod
+    def read_server_logs(max_lines: int = 200, max_bytes: int = 1024 * 1024):
+        """Read neofrp server logs.
+
+        Returns a tuple: (log_text, source_label, error_message).
+        """
+        max_lines = int(max_lines)
+        if max_lines < 1:
+            max_lines = 1
+        if max_lines > 5000:
+            max_lines = 5000
+
+        source = ServerConfigManager.get_log_source()
+
+        if source == 'journal':
+            import subprocess
+
+            try:
+                # journalctl output can be large; rely on -n for line cap.
+                result = subprocess.run(
+                    [
+                        'journalctl',
+                        '-u', 'neofrp-server',
+                        '-n', str(max_lines),
+                        '--no-pager',
+                        '-o', 'short-iso'
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode != 0:
+                    err = (result.stderr or result.stdout or '').strip()
+                    if not err:
+                        err = 'journalctl returned non-zero exit code'
+                    return '', 'systemd journal', err
+
+                text = result.stdout or ''
+                if len(text.encode('utf-8', errors='ignore')) > max_bytes:
+                    # Keep the tail end of the output
+                    b = text.encode('utf-8', errors='replace')
+                    text = b[-max_bytes:].decode('utf-8', errors='replace')
+                    text = '[output truncated]\n' + text
+                return text.strip('\n'), 'systemd journal', None
+            except FileNotFoundError:
+                return '', 'systemd journal', 'journalctl not found on this system'
+            except subprocess.TimeoutExpired:
+                return '', 'systemd journal', 'journalctl timed out'
+            except Exception as e:
+                return '', 'systemd journal', f'Failed to read journal: {e}'
+
+        # file mode
+        log_path = (ServerConfigManager.get_log_file_path() or '').strip()
+        if not log_path:
+            return '', 'log file', 'Log file path not configured'
+        if not os.path.isabs(log_path):
+            return '', 'log file', 'Log file path must be an absolute path'
+
+        try:
+            text = ServerConfigManager._tail_file(log_path, max_lines=max_lines, max_bytes=max_bytes)
+            return text.strip('\n'), 'log file', None
+        except Exception as e:
+            return '', 'log file', str(e)
 
     @staticmethod
     def get_config_path():

@@ -299,3 +299,17 @@ class ServerConfigForm(FlaskForm):
         ('warn', 'Warning'),
         ('error', 'Error')
     ], default='info')
+
+    log_source = SelectField('Log Source', choices=[
+        ('journal', 'Systemd journal (neofrp-server service)'),
+        ('file', 'Log file path')
+    ], default='journal')
+
+    log_file_path = StringField('Log File Path', validators=[
+        Optional(),
+        Length(max=512)
+    ], description='Used when Log Source is set to Log file path')
+
+    def validate_log_file_path(self, field):
+        if self.log_source.data == 'file' and not (field.data or '').strip():
+            raise ValidationError('Log file path is required when using Log file path source.')
